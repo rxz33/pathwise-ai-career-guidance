@@ -1,0 +1,55 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.input {
+    @apply w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400;
+  }
+  
+  /* index.css */
+.error {
+  color: red;  /* You can change this color to any shade you like */
+  font-size: 0.875rem;  /* Optional: Adjust the size of the error message */
+  font-weight: 500;  /* Optional: Make the text a little bolder */
+  margin-top: 0.25rem;  /* Optional: Add some space above the error message */
+  display: inline-block;  /* Makes the error message inline with the field */
+}
+/* index.css */
+html {
+  font-size: 16px; /* Default font size for the page */
+}
+
+body {
+  font-family: 'Arial', sans-serif;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 600;
+}
+
+h2 {
+  font-size: 1.5rem; /* Adjust size of h2 headers */
+}
+
+h3 {
+  font-size: 1.25rem;
+}
+
+label {
+  font-size: 1rem; /* Adjust size of labels */
+}
+
+input, textarea, select {
+  font-size: 1rem; /* Adjust input and textarea text */
+}
+
+/* You can also create classes for specific elements you want to style */
+.input-text {
+  font-size: 1.1rem;
+}
+
+.select-dropdown {
+  font-size: 1rem;
+}
+
+/* You can add more global typography rules here */

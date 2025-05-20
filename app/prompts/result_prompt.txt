@@ -1,0 +1,29 @@
+User Name: $fullName
+Age: $age
+Current Status: $currentStatus
+Field of Study: $fieldOfStudy
+Education Level: $educationLevel
+Mobility Preference: $mobility
+Financial Status (1-10): $financialStatus
+Career Areas Interested in Exploring: $exploreAreas
+Preferred Role: $preferredRole
+Top Job Priorities: $jobPriorities
+Strengths: $strengths
+Areas of Struggle: $struggleWith
+Confidence Level (1-10): $confidenceLevel
+Risk Taking Ability: $riskTaking
+
+Evaluation Summary from Cross-Examination:
+$evaluation
+
+---
+
+Based on the above details and the evaluation summary, perform the following:
+
+1. Recommend the top 3 most suitable career paths for this user.
+2. Provide a short explanation for each recommendation.
+3. Highlight key strengths and how they align with these career paths.
+4. Identify any weaknesses or skill gaps to address.
+5. Give a personalized learning roadmap or action plan to achieve the career goals.
+
+Make the result sound human, empathetic, and easy to understand. Use bullet points where helpful.
