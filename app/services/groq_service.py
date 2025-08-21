@@ -2,6 +2,11 @@ import os
 from dotenv import load_dotenv
 from groq import Groq
 import asyncio
+import logging
+
+# Setup logging
+logger = logging.getLogger("groq_service")
+logging.basicConfig(level=logging.INFO)
 
 # Load environment variables
 load_dotenv()
@@ -13,12 +18,12 @@ if not GROQ_API_KEY:
 
 # Initialize Groq client
 client = Groq(api_key=GROQ_API_KEY)
-MODEL_NAME = "llama3-70b-8192"  # Groq model for your project
+MODEL_NAME = "llama3-70b-8192"
 
-# ✅ Async function to call Groq model
-async def ask_groq(prompt: str, temperature: float = 0.7, max_tokens: int = 1024) -> str:
+async def ask_groq(prompt: str, temperature: float = 0.7, max_tokens: int = 2048) -> str:
     try:
-        # Run synchronous Groq call in a separate thread
+        logger.info("Sending prompt to Groq API...")
+
         def sync_call():
             response = client.chat.completions.create(
                 model=MODEL_NAME,
@@ -32,7 +37,10 @@ async def ask_groq(prompt: str, temperature: float = 0.7, max_tokens: int = 1024
             return response.choices[0].message.content.strip()
 
         response_text = await asyncio.to_thread(sync_call)
+        logger.info("Received response from Groq API")
         return response_text
 
     except Exception as e:
-        return f"❌ Groq Error: {str(e)}"
+        logger.error(f"Groq API call failed: {e}")
+        # Raise exception instead of returning ❌ string
+        raise RuntimeError(f"Groq API call failed: {str(e)}")
