@@ -1,35 +1,38 @@
 import os
 from dotenv import load_dotenv
-import google.generativeai as genai
+from groq import Groq
 import asyncio
 
 # Load environment variables
 load_dotenv()
 
-# Get Gemini API key
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-if not GEMINI_API_KEY:
-    raise EnvironmentError("GEMINI_API_KEY not found in .env file.")
+# Get Groq API key
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+if not GROQ_API_KEY:
+    raise EnvironmentError("GROQ_API_KEY not found in .env file.")
 
-# Configure Gemini
-genai.configure(api_key=GEMINI_API_KEY)
+# Initialize Groq client
+client = Groq(api_key=GROQ_API_KEY)
+MODEL_NAME = "llama3-70b-8192"  # Groq model for your project
 
-# Create Gemini model
-gemini_model = genai.GenerativeModel("models/gemini-1.5-flash")
-
-# ✅ Make Gemini call async using asyncio.to_thread (runs sync function in a thread)
-async def ask_gemini(prompt: str, temperature: float = 0.7, max_tokens: int = 1024) -> str:
+# ✅ Async function to call Groq model
+async def ask_groq(prompt: str, temperature: float = 0.7, max_tokens: int = 1024) -> str:
     try:
+        # Run synchronous Groq call in a separate thread
         def sync_call():
-            return gemini_model.generate_content(
-                prompt,
-                generation_config={
-                    "temperature": temperature,
-                    "max_output_tokens": max_tokens,
-                }
-            ).text.strip()
-        
+            response = client.chat.completions.create(
+                model=MODEL_NAME,
+                messages=[
+                    {"role": "system", "content": "You are a helpful AI career counselor."},
+                    {"role": "user", "content": prompt}
+                ],
+                temperature=temperature,
+                max_output_tokens=max_tokens
+            )
+            return response.choices[0].message.content.strip()
+
         response_text = await asyncio.to_thread(sync_call)
         return response_text
+
     except Exception as e:
-        return f"❌ Gemini Error: {str(e)}"
+        return f"❌ Groq Error: {str(e)}"
