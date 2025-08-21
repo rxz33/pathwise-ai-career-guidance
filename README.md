@@ -24,7 +24,7 @@ ai-career-guide/
 ├── .env               # API keys, secrets (excluded from repo)
 ├── .gitignore         # Prevents tracking of node_modules, venv, etc.
 
-## 🛠️ Tech Stack
+c## 🛠️ Tech Stack
 
 - **Frontend:** React, Vite, Tailwind CSS  
 - **Backend:** FastAPI, Pydantic, Uvicorn  
