@@ -4,7 +4,7 @@ from pydantic import BaseModel
 from fastapi import APIRouter, HTTPException
 from string import Template
 from app.services.mongo_service import get_user_by_email
-from app.services.gemini_service import ask_gemini
+from app.services.gemini_service import ask_groq
 import traceback
 
 router = APIRouter()
@@ -42,7 +42,7 @@ async def evaluate_cross_exam(data: EvaluationRequest):
         )
 
         print("📨 Cross Eval Prompt:\n", prompt[:300])
-        gemini_output = await ask_gemini(prompt)
+        gemini_output = await ask_groq(prompt)
         print("📥 Gemini Output:\n", gemini_output[:300])
 
         # Forward to generate-results

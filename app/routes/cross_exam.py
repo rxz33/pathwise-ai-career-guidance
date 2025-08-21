@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from app.schemas.user_data import CrossExamEmail
 from app.schemas.cross_exam_response import CrossExamQuestionSet
-from app.services.gemini_service import ask_gemini
+from app.services.gemini_service import ask_groq
 from app.database import db
 import os
 
@@ -40,7 +40,7 @@ async def generate_cross_exam_questions(payload: CrossExamEmail):
             filled_prompt = filled_prompt.replace(f"${key}", str(value))
 
         # 4. Ask Gemini
-        response = await ask_gemini(filled_prompt)
+        response = await ask_groq(filled_prompt)
         if response.startswith("❌"):
             raise HTTPException(status_code=500, detail=response)
 

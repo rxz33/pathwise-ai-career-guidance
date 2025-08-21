@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-from app.services.gemini_service import ask_gemini
+from app.services.gemini_service import ask_groq
 from app.services.mongo_service import get_user_by_email 
 from app.services.mongo_service import update_user_by_email 
 from string import Template
@@ -56,7 +56,7 @@ async def generate_final_career_result(data: CrossExamAnswerInput):
         )
 
         # 3. Get final analysis from Gemini
-        final_result = await ask_gemini(prompt)
+        final_result = await ask_groq(prompt)
         
         # ✅ Save result to MongoDB
         await update_user_by_email(data.email, {"finalAnalysis": final_result})
