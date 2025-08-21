@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-from app.services.gemini_service import ask_groq
+from app.services.groq_service import ask_groq
 from app.services.mongo_service import get_user_by_email 
 from app.services.mongo_service import update_user_by_email 
 from string import Template
@@ -55,7 +55,7 @@ async def generate_final_career_result(data: CrossExamAnswerInput):
             evaluation=data.evaluation.strip()
         )
 
-        # 3. Get final analysis from Gemini
+        # 3. Get final analysis from Groq
         final_result = await ask_groq(prompt)
         
         # ✅ Save result to MongoDB

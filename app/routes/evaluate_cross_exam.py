@@ -4,7 +4,7 @@ from pydantic import BaseModel
 from fastapi import APIRouter, HTTPException
 from string import Template
 from app.services.mongo_service import get_user_by_email
-from app.services.gemini_service import ask_groq
+from app.services.groq_service import ask_groq
 import traceback
 
 router = APIRouter()
@@ -42,21 +42,21 @@ async def evaluate_cross_exam(data: EvaluationRequest):
         )
 
         print("📨 Cross Eval Prompt:\n", prompt[:300])
-        gemini_output = await ask_groq(prompt)
-        print("📥 Gemini Output:\n", gemini_output[:300])
+        groq_output = await ask_groq(prompt)
+        print("📥 Groq Output:\n", groq_output[:300])
 
         # Forward to generate-results
         async with httpx.AsyncClient() as client:
             try:
                 response = await client.post("http://localhost:8000/generate-results", json={
                     "email": data.email,
-                    "evaluation": gemini_output
+                    "evaluation": groq_output
                 })
                 response.raise_for_status()
             except httpx.HTTPError as http_err:
                 print("⚠️ Error calling /generate-results:", http_err)
 
-        return {"evaluation": gemini_output}
+        return {"evaluation": groq_output}
 
     except Exception as e:
         print(f"🔴 Error in evaluate-cross-exam: {e}")
