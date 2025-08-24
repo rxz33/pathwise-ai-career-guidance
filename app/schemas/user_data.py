@@ -1,5 +1,6 @@
 from pydantic import BaseModel, Field, EmailStr
 from typing import Optional, List, Literal
+from datetime import datetime
 
 class PersonalInfos(BaseModel):
     fullName: Optional[str]
@@ -59,6 +60,9 @@ class Optionals(BaseModel):
 
 # Final combined model
 class UserData(BaseModel):
+    userId: Optional[str] = None  # Can be UUID from frontend/backend
+    createdAt: datetime = Field(default_factory=datetime.utcnow)
+    updatedAt: datetime = Field(default_factory=datetime.utcnow)
     personalInfo: Optional[PersonalInfos] = None
     interests: Optional[Interests] = None
     strengthsAndWeaknesses: Optional[StrengthWs] = None
