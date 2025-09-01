@@ -1,119 +1,158 @@
-import React from "react";
+import React, { useState } from "react";
 import { useFormContext } from "react-hook-form";
 
 const StepInterests = () => {
-  const {
-    register,
-    formState: { errors },
-  } = useFormContext();
+  const { register, formState: { errors } } = useFormContext();
+
+  const [showOther, setShowOther] = useState({
+    subjects: false,
+    activities: false,
+    onlineContent: false,
+    exploreAreas: false,
+    preferredRole: false,
+    preferredCompany: false,
+    jobPriorities: false,
+  });
+
+  const subjectsOptions = ["Mathematics", "Biology", "History", "Computer Science", "Economics", "Other"];
+  const activitiesOptions = ["Solving puzzles", "Designing", "Writing blogs", "Gaming", "Volunteering", "Other"];
+  const onlineContentOptions = ["Tech YouTube videos", "Podcast interviews", "TED talks", "Blogs", "Online Courses", "Other"];
+  const exploreAreasOptions = ["AI", "Entrepreneurship", "UI/UX", "Robotics", "Cybersecurity", "Other"];
+  const preferredRoleOptions = ["Developer", "Researcher", "Designer", "Data Analyst", "Product Manager", "Other"];
+  const preferredCompanyOptions = ["Startup", "MNC", "NGO", "Remote-first", "Government", "Other"];
+  const jobPrioritiesOptions = ["Salary", "Learning", "Stability", "Work-life balance", "Social Impact", "Leadership", "Other"];
 
   return (
     <div className="space-y-6">
-      <h2 className="text-xl font-semibold text-gray-800">Interest & Preferences</h2>
+      <h2 className="text-xl font-semibold text-gray-800">Interests & Preferences</h2>
 
       {/* Favorite Subjects */}
       <div>
-        <label className="block mb-1">Favorite Subjects</label>
-        <input
-          type="text"
+        <label>Favorite Subjects</label>
+        <select
           {...register("favoriteSubjects")}
-          placeholder="e.g. Mathematics, Biology, History"
           className="input"
-        />
-        {errors.favoriteSubjects && (
-          <p className="text-red-500 text-sm">{errors.favoriteSubjects.message}</p>
+          onChange={(e) => setShowOther(prev => ({ ...prev, subjects: e.target.value === "Other" }))}
+        >
+          <option value="">Select</option>
+          {subjectsOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+        </select>
+        {showOther.subjects && (
+          <input type="text" {...register("favoriteSubjectsOther")} placeholder="Your subject" className="input mt-2" />
         )}
+        {errors.favoriteSubjects && <p className="text-red-500 text-sm">{errors.favoriteSubjects.message}</p>}
       </div>
 
       {/* Activities That Make You Lose Track of Time */}
       <div>
-        <label className="block mb-1">Activities That Make You Lose Track of Time</label>
-        <textarea
+        <label>Activities That Make You Lose Track of Time</label>
+        <select
           {...register("activitiesThatMakeYouLoseTime")}
-          placeholder="e.g. Solving puzzles, Designing, Writing blogs"
           className="input"
-          rows={3}
-        />
+          onChange={(e) => setShowOther(prev => ({ ...prev, activities: e.target.value === "Other" }))}
+        >
+          <option value="">Select</option>
+          {activitiesOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+        </select>
+        {showOther.activities && (
+          <input type="text" {...register("activitiesOther")} placeholder="Your activity" className="input mt-2" />
+        )}
         {errors.activitiesThatMakeYouLoseTime && (
           <p className="text-red-500 text-sm">{errors.activitiesThatMakeYouLoseTime.message}</p>
         )}
       </div>
 
-      {/* Online Content You Enjoy */}
+      {/* Online Content */}
       <div>
-        <label className="block mb-1">Online Content You Enjoy</label>
-        <input
-          type="text"
+        <label>Online Content You Enjoy</label>
+        <select
           {...register("onlineContent")}
-          placeholder="e.g. Tech YouTube videos, Podcast interviews, TED talks"
           className="input"
-        />
-        {errors.onlineContent && (
-          <p className="text-red-500 text-sm">{errors.onlineContent.message}</p>
+          onChange={(e) => setShowOther(prev => ({ ...prev, onlineContent: e.target.value === "Other" }))}
+        >
+          <option value="">Select</option>
+          {onlineContentOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+        </select>
+        {showOther.onlineContent && (
+          <input type="text" {...register("onlineContentOther")} placeholder="Your content" className="input mt-2" />
         )}
+        {errors.onlineContent && <p className="text-red-500 text-sm">{errors.onlineContent.message}</p>}
       </div>
 
       {/* Areas You’d Like to Explore */}
       <div>
-        <label className="block mb-1">Areas You’d Like to Explore</label>
-        <input
-          type="text"
+        <label>Areas You’d Like to Explore</label>
+        <select
           {...register("exploreAreas")}
-          placeholder="e.g. AI, Entrepreneurship, UI/UX"
           className="input"
-        />
-        {errors.exploreAreas && (
-          <p className="text-red-500 text-sm">{errors.exploreAreas.message}</p>
+          onChange={(e) => setShowOther(prev => ({ ...prev, exploreAreas: e.target.value === "Other" }))}
+        >
+          <option value="">Select</option>
+          {exploreAreasOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+        </select>
+        {showOther.exploreAreas && (
+          <input type="text" {...register("exploreAreasOther")} placeholder="Your area" className="input mt-2" />
         )}
+        {errors.exploreAreas && <p className="text-red-500 text-sm">{errors.exploreAreas.message}</p>}
       </div>
 
       {/* Preferred Role */}
       <div>
-        <label className="block mb-1">Preferred Role</label>
-        <input
-          type="text"
+        <label>Preferred Role</label>
+        <select
           {...register("preferredRole")}
-          placeholder="e.g. Developer, Researcher, Designer"
           className="input"
-        />
-        {errors.preferredRole && (
-          <p className="text-red-500 text-sm">{errors.preferredRole.message}</p>
+          onChange={(e) => setShowOther(prev => ({ ...prev, preferredRole: e.target.value === "Other" }))}
+        >
+          <option value="">Select</option>
+          {preferredRoleOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+        </select>
+        {showOther.preferredRole && (
+          <input type="text" {...register("preferredRoleOther")} placeholder="Your role" className="input mt-2" />
         )}
+        {errors.preferredRole && <p className="text-red-500 text-sm">{errors.preferredRole.message}</p>}
       </div>
 
-      {/* Preferred Company Type */}
+      {/* Preferred Company */}
       <div>
-        <label className="block mb-1">Preferred Company Type</label>
-        <input
-          type="text"
+        <label>Preferred Company Type</label>
+        <select
           {...register("preferredCompany")}
-          placeholder="e.g. Startup, MNC, NGO, Remote-first"
           className="input"
-        />
-        {errors.preferredCompany && (
-          <p className="text-red-500 text-sm">{errors.preferredCompany.message}</p>
+          onChange={(e) => setShowOther(prev => ({ ...prev, preferredCompany: e.target.value === "Other" }))}
+        >
+          <option value="">Select</option>
+          {preferredCompanyOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+        </select>
+        {showOther.preferredCompany && (
+          <input type="text" {...register("preferredCompanyOther")} placeholder="Your company type" className="input mt-2" />
         )}
+        {errors.preferredCompany && <p className="text-red-500 text-sm">{errors.preferredCompany.message}</p>}
       </div>
 
       {/* Job Priorities */}
       <div>
-        <label className="block mb-1">Job Priorities</label>
+        <label>Job Priorities</label>
         <div className="grid grid-cols-2 gap-2">
-          {["Salary", "Learning", "Stability", "Work-life balance", "Social Impact", "Leadership"].map((priority) => (
+          {jobPrioritiesOptions.map(priority => (
             <label key={priority} className="flex items-center space-x-2">
               <input
                 type="checkbox"
                 value={priority}
                 {...register("jobPriorities")}
+                onChange={(e) =>
+                  priority === "Other" ? setShowOther(prev => ({ ...prev, jobPriorities: e.target.checked })) : null
+                }
                 className="accent-indigo-600"
               />
               <span>{priority}</span>
             </label>
           ))}
         </div>
-        {errors.jobPriorities && (
-          <p className="text-red-500 text-sm">{errors.jobPriorities.message}</p>
+        {showOther.jobPriorities && (
+          <input type="text" {...register("jobPrioritiesOther")} placeholder="Your priority" className="input mt-2" />
         )}
+        {errors.jobPriorities && <p className="text-red-500 text-sm">{errors.jobPriorities.message}</p>}
       </div>
     </div>
   );

@@ -1,38 +1,52 @@
 import { z } from "zod";
 
 export const StrengthWs = z.object({
-  strengths: z
-    .string()
-    .min(2, "Please list at least one strength")
-    .optional(),
+  // Strengths
+  strengths: z.string().optional(),
+  strengthsOther: z.string().optional()
+    .refine((val, ctx) => {
+      const parent = ctx.parent;
+      return parent.strengths !== "Other" || (val && val.trim().length > 0);
+    }, "Please specify your strength"),
 
-  struggleWith: z
-    .string()
-    .min(2, "Please mention at least one struggle area")
-    .optional(),
+  // Struggles
+  struggleWith: z.string().optional(),
+  struggleWithOther: z.string().optional()
+    .refine((val, ctx) => {
+      const parent = ctx.parent;
+      return parent.struggleWith !== "Other" || (val && val.trim().length > 0);
+    }, "Please specify your struggle area"),
 
-  confidenceLevel: z
-    .number()
-    .min(1, "Minimum value is 1")
-    .max(10, "Maximum value is 10")
-    .optional(),
+  // Confidence
+  confidenceLevel: z.number().min(1).max(10).optional(),
 
-  toolsTechUsed: z
-    .string()
-    .min(2, "Please mention tools or technologies")
-    .optional(),
+  // Tools / Tech
+  toolsTechUsed: z.string().optional(),
+  toolsTechOther: z.string().optional()
+    .refine((val, ctx) => {
+      const parent = ctx.parent;
+      return parent.toolsTechUsed !== "Other" || (val && val.trim().length > 0);
+    }, "Please specify the tool/technology"),
 
-  internshipOrProject: z
-    .string()
-    .min(3, "Please describe your internship/project")
-    .optional(),
+  // Internship / Project
+  internshipOrProject: z.string().optional(),
+  internshipOther: z.string().optional(),
 
-  whatDidYouLearn: z
-    .string()
-    .min(3, "Please describe what you learned")
-    .optional(),
+  // Learnings
+  whatDidYouLearn: z.string().optional(),
+  learningOther: z.string().optional(),
 
-  relatedToCareer: z
-    .enum(["Yes", "No"])
-    .optional(),
+  // Related to Career
+  relatedToCareer: z.string().optional(),
+
+  // Resume Section
+  hasResume: z.string().optional(),
+  resumeFile: z
+    .any()
+    .optional()
+    .refine((file, ctx) => {
+      const parent = ctx.parent;
+      // Only require file if "Yes" is selected
+      return parent.hasResume !== "Yes" || file;
+    }, "Please upload your resume"),
 });

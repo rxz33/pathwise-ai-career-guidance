@@ -1,5 +1,6 @@
+# app/routes/user_info.py
 from fastapi import APIRouter, Request, HTTPException
-from app.database import db  # Your MongoDB client (Motor)
+from app.services.mongo_service import update_user_by_email  # <-- use your service
 
 router = APIRouter()
 
@@ -16,14 +17,10 @@ async def submit_user_info(request: Request):
         if not email:
             raise HTTPException(status_code=422, detail="Email is required inside 'personal' field")
 
-        # Upsert: Insert new or update existing based on email
-        result = await db.user_data.update_one(
-            {"personal.email": email},
-            {"$set": data},
-            upsert=True
-        )
+        # 🔒 Use encryption-aware update function
+        await update_user_by_email(email, data)
 
-        print("✅ Data upserted for email:", email)
+        print("✅ Data upserted (encrypted) for email:", email)
         return {
             "message": "User information stored successfully",
             "email": email

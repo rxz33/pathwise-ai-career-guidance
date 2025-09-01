@@ -2,87 +2,152 @@ from pydantic import BaseModel, Field, EmailStr
 from typing import Optional, List, Literal
 from datetime import datetime
 
+# ------------------- Personal Info -------------------
 class PersonalInfos(BaseModel):
-    fullName: Optional[str]
+    fullName: Optional[str] = None
     age: Optional[int] = Field(None, ge=14, le=80)
-    currentStatus: Optional[Literal["Student", "Fresher", "Working Professional", "Career Break"]]
-    fieldOfStudy: Optional[str]
+    currentStatus: Optional[Literal["Student", "Fresher", "Working Professional", "Career Break"]] = None
+    fieldOfStudy: Optional[str] = None
     educationLevel: Optional[
         Literal["High School", "Diploma/Intermediate", "Undergraduate", "Postgraduate", "Doctorate", "Other"]
-    ]
-    mobility: Optional[Literal["Willing to relocate", "Prefer hometown", "Depends on opportunity"]]
-    financialStatus: Optional[int] = Field(None, ge=1, le=10)
+    ] = None
+    mobility: Optional[Literal["Willing to relocate", "Prefer hometown", "Depends on opportunity"]] = None
+    financialStatus: Optional[Literal["Lower Class", "Middle Class", "Upper Class"]] = None
+
+    country: Optional[str] = None
+    state: Optional[str] = None
+    city: Optional[str] = None
 
     class Config:
         extra = "allow"
 
+# ------------------- Interests -------------------
 class Interests(BaseModel):
-    favoriteSubjects: Optional[str]
-    activitiesThatMakeYouLoseTime: Optional[str]
-    onlineContent: Optional[str]
-    exploreAreas: Optional[str]
-    preferredRole: Optional[str]
-    preferredCompany: Optional[str]
-    jobPriorities: Optional[List[str]]
+    favoriteSubjects: Optional[str] = None
+    favoriteSubjectsOther: Optional[str] = None
+
+    activitiesThatMakeYouLoseTime: Optional[str] = None
+    activitiesOther: Optional[str] = None
+
+    onlineContent: Optional[str] = None
+    onlineContentOther: Optional[str] = None
+
+    exploreAreas: Optional[str] = None
+    exploreAreasOther: Optional[str] = None
+
+    preferredRole: Optional[str] = None
+    preferredRoleOther: Optional[str] = None
+
+    preferredCompany: Optional[str] = None
+    preferredCompanyOther: Optional[str] = None
+
+    jobPriorities: Optional[List[str]] = None
+    jobPrioritiesOther: Optional[str] = None
 
     class Config:
         extra = "allow"
 
+# ------------------- Strengths & Weaknesses -------------------
 class StrengthWs(BaseModel):
-    strengths: Optional[str]
-    struggleWith: Optional[str]
+    strengths: Optional[str] = None
+    strengthsOther: Optional[str] = None
+
+    struggleWith: Optional[str] = None
+    struggleWithOther: Optional[str] = None
+
     confidenceLevel: Optional[int] = Field(None, ge=1, le=10)
-    toolsTechUsed: Optional[str]
-    internshipOrProject: Optional[str]
-    whatDidYouLearn: Optional[str]
-    relatedToCareer: Optional[Literal["Yes", "No"]]
+
+    toolsTechUsed: Optional[str] = None
+    toolsTechOther: Optional[str] = None
+
+    internshipOrProject: Optional[str] = None
+    internshipOther: Optional[str] = None
+
+    whatDidYouLearn: Optional[str] = None
+    learningOther: Optional[str] = None
+
+    relatedToCareer: Optional[Literal["Yes", "No"]] = None
+
+    hasResume: Optional[Literal["Yes", "No"]] = None
+    resumeFile: Optional[bytes] = None  # For file upload
 
     class Config:
         extra = "allow"
 
+# ------------------- Learning Roadmaps -------------------
 class LearningRoadmaps(BaseModel):
-    studyPlan: Optional[str]
-    preferredLearning: Optional[List[str]]
-    openToExplore: Optional[Literal["Yes", "No"]]
-    riskTaking: Optional[Literal["Low", "Medium", "High"]]
+    studyPlan: Optional[str] = None
+    studyPlanOther: Optional[str] = None
+
+    preferredLearning: Optional[str] = None
+    preferredLearningOther: Optional[str] = None
+
+    openToExplore: Optional[str] = None
+    openToExploreOther: Optional[str] = None
+
+    riskTaking: Optional[str] = None
+    riskTakingOther: Optional[str] = None
 
     class Config:
         extra = "allow"
 
+# ------------------- Optional Fields -------------------
 class Optionals(BaseModel):
     currentRole: Optional[str] = None
-    yearsOfExperience: Optional[int] = Field(None, ge=0, le=50) 
+    yearsOfExperience: Optional[int] = Field(None, ge=0, le=50)
     leadershipRole: Optional[Literal["Yes", "No"]] = None
     leadershipSkill: Optional[str] = None
 
     class Config:
         extra = "allow"
 
-# Final combined model
+# ------------------- Final Combined Model -------------------
 class UserData(BaseModel):
-    userId: Optional[str] = None  # Can be UUID from frontend/backend
+    userId: Optional[str] = None
     createdAt: datetime = Field(default_factory=datetime.utcnow)
     updatedAt: datetime = Field(default_factory=datetime.utcnow)
+
     personalInfo: Optional[PersonalInfos] = None
     interests: Optional[Interests] = None
     strengthsAndWeaknesses: Optional[StrengthWs] = None
     learningRoadmap: Optional[LearningRoadmaps] = None
     optionalFields: Optional[Optionals] = None
+
+    class Config:
+        extra = "allow"
+        
+class BigFivePayload(BaseModel):
+    email: EmailStr
+    test: str
+    scores: dict
     
+class RiasecPayload(BaseModel):
+    email: EmailStr
+    test: str
+    scores: dict
+    
+class AptiPayload(BaseModel):
+    email: EmailStr
+    test: str
+    scores: dict
+    
+# ------------------- Cross Examination Input -------------------
 class CrossExamInput(BaseModel):
     fullName: str
     age: Optional[int] = None
     currentStatus: Optional[str] = None
     fieldOfStudy: Optional[str] = None
+
     strengths: Optional[str] = None
     struggleWith: Optional[str] = None
     internshipOrProject: Optional[str] = None
     whatDidYouLearn: Optional[str] = None
+
     preferredRole: Optional[str] = None
     jobPriorities: Optional[List[str]] = None
     confidenceLevel: Optional[int] = None
     riskTaking: Optional[str] = None
-    
+
 class CrossExamEmail(BaseModel):
     email: EmailStr
 

@@ -10,6 +10,10 @@ import Interest from "../components/Interest";
 import StrengthW from "../components/StrengthW";
 import LearningRoadmap from "../components/LearningRoadmap";
 import Optional from "../components/Optional";
+import TestPage from "../components/TestPage";       // Big Five
+import RiasecTest from "../components/RiasecTest"; // RIASEC
+import AptitudeTest from "../components/AptitudeTest";
+
 
 import { PersonalInfos } from "../schemas/PersonalInfos";
 import { Interests } from "../schemas/Interests";
@@ -17,23 +21,21 @@ import { StrengthWs } from "../schemas/StrengthWs";
 import { LearningRoadmaps } from "../schemas/LearningRoadmaps";
 import { Optionals } from "../schemas/Optionals";
 
-const MultiStepForm = () => {
+const MultiStepForm = ({ flatStyle = false }) => {
   const navigate = useNavigate();
 
-  // Initialize form methods early so we can use reset immediately
   const methods = useForm({
-    resolver: zodResolver(PersonalInfos), // default schema, will be updated below
+    resolver: zodResolver(PersonalInfos),
     mode: "onTouched",
   });
 
-  // 🔄 Reset form and localStorage on page refresh
+  // Reset form and localStorage on mount
   useEffect(() => {
     localStorage.removeItem("multiStepFormStep");
-    localStorage.removeItem("multiStepFormData");
     methods.reset();
   }, []);
 
-  const [step, setStep] = useState(1); // no longer reading from localStorage
+  const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
 
@@ -46,9 +48,9 @@ const MultiStepForm = () => {
     step === 2 ? Interests :
     step === 3 ? StrengthWs :
     step === 4 ? LearningRoadmaps :
-    Optionals;
+    step === 5 ? Optionals :
+    null;
 
-  // Dynamically update resolver based on current step
   useEffect(() => {
     methods.reset(methods.getValues(), {
       keepErrors: true,
@@ -56,10 +58,9 @@ const MultiStepForm = () => {
       keepValues: true,
       keepDefaultValues: true,
     });
-    methods.resetField; // ensure updates on schema change
   }, [currentSchema]);
 
-  // 🧠 Save form data to localStorage when any field changes
+  // Save data on change
   useEffect(() => {
     const subscription = methods.watch(() => {
       const allValues = methods.getValues();
@@ -68,153 +69,188 @@ const MultiStepForm = () => {
     return () => subscription.unsubscribe();
   }, [methods]);
 
-  const onSubmit = async () => {
-    const email = localStorage.getItem("userEmail");
-    if (!email) {
-      console.error("❌ Email not found in localStorage");
-      toast.error("Email missing. Please log in again.");
-      return;
+// Final submission
+const onSubmit = async () => {
+  const email = localStorage.getItem("userEmail");
+  if (!email) {
+    toast.error("Email missing. Please log in again.");
+    return;
+  }
+
+  const rawData = methods.getValues();
+  const formData = {
+    ...rawData,
+    personal: {
+      ...rawData.personal,
+      email,
+    },
+  };
+
+  try {
+    setIsSubmitting(true);
+
+    // 1️⃣ Upload resume if present
+    if (formData.hasResume === "Yes" && formData.resumeFile?.length > 0) {
+      const formDataUpload = new FormData();
+      formDataUpload.append("email", email);
+      formDataUpload.append("resume", formData.resumeFile[0]);
+
+      await fetch("http://localhost:8000/upload-resume", {
+        method: "POST",
+        body: formDataUpload,
+      });
     }
 
-    const rawData = methods.getValues();
-    const formData = {
-      ...rawData,
-      personal: {
-        ...rawData.personal,
-        email,
-      },
-    };
+    // 2️⃣ Submit other form info
+    const response = await fetch("http://localhost:8000/submit-info", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(formData),
+    });
 
-    console.log("✅ Submitting Form Data:", formData);
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.detail);
 
-    try {
-      setIsSubmitting(true);
-      const response = await fetch("http://localhost:8000/submit-info", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
+    // ✅ Success flow
+    setIsSuccess(true);
+    toast.success("Form submitted successfully!");
+    localStorage.setItem("user_form_data", JSON.stringify(formData));
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(`❌ API Error: ${data.detail}`);
-      }
-
-      console.log("✅ Submission Success:", data);
-      setIsSuccess(true);
-      toast.success("Submitted successfully! 🎉");
-
-      // ✅ Store form data for cross-examination
-      localStorage.setItem("user_form_data", JSON.stringify(formData));
-
-
-      // 🧼 Clear localStorage and form
+    // ⏳ Navigate first, reset later
+    setTimeout(() => {
+      // navigate("/loading");
       methods.reset();
       localStorage.removeItem("multiStepFormStep");
-      localStorage.removeItem("multiStepFormData");
+    }, 1500);
 
-      // 🔁 Navigate to loading screen
-      setTimeout(() => {
-        navigate("/loading");
-      }, 1500);
-    } catch (error) {
-      console.error("❌ Submission Error:", error);
-      toast.error("Submission failed. Please try again.");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  } catch (error) {
+    console.error(error);
+    toast.error("Submission failed. Please try again.");
+  } finally {
+    setIsSubmitting(false);
+  }
+};
 
   const handleNext = async () => {
     const valid = await methods.trigger();
-    if (valid) setStep((prev) => prev + 1);
+    if (!valid) return;
+
+    if (step < 8) {
+      setStep((prev) => prev + 1);
+    } else if (step === 5) {
+      // Directly submit after step 5
+      onSubmit();
+    }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#f2f4f8] via-white to-[#e8edf5] flex justify-center items-center py-10 px-4">
-      <div className="w-full max-w-4xl bg-white/60 backdrop-blur-md rounded-3xl shadow-xl p-8 md:p-12 transition-all duration-300 border border-gray-200">
-
+    <div className="min-h-screen bg-gradient-to-br from-[#f2f4f8] via-white to-[#e8edf5] flex justify-center items-start py-10 px-4">
+      <div className="w-full max-w-4xl space-y-8">
+        
         {/* Progress Bar */}
-        <div className="w-full bg-gray-200 rounded-full h-3 mb-8 overflow-hidden">
+        <div
+          className={`w-full ${flatStyle ? "h-1 bg-gray-300" : "bg-gray-200 rounded-full h-3"} mb-8 overflow-hidden`}
+        >
           <div
-            className="bg-indigo-500 h-full transition-all duration-500 ease-in-out"
-            style={{ width: `${(step / 5) * 100}%` }}
+            className={`${flatStyle ? "bg-indigo-600" : "bg-indigo-500 rounded-full"} h-full transition-all duration-500 ease-in-out`}
+            style={{ width: `${(step / 8) * 100}%` }}
           ></div>
         </div>
 
         {/* Success Message */}
         {isSuccess && (
           <div className="text-green-600 text-center font-medium text-lg flex items-center justify-center gap-2 mb-6">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-green-500" fill="none"
-              viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-            </svg>
-            Submitted successfully!
+            ✅ Submitted successfully!
           </div>
         )}
 
         <h2 className="text-2xl md:text-3xl font-semibold text-gray-800 text-center mb-4">
-          Step {step} of 5
+          Step {step} of 8
         </h2>
 
         <FormProvider {...methods}>
-          <form
-            onSubmit={async (e) => {
-              e.preventDefault();
-              if (step === 5) {
-                await methods.handleSubmit(onSubmit)(e);
-              } else {
-                await handleNext();
-              }
-            }}
-            className="space-y-10"
-          >
+          <form onSubmit={(e) => e.preventDefault()} className="space-y-10">
             {step === 1 && <PersonalInfo />}
             {step === 2 && <Interest />}
             {step === 3 && <StrengthW />}
             {step === 4 && <LearningRoadmap />}
             {step === 5 && <Optional />}
+            {step === 6 && <TestPage />}
+            {step === 7 && <RiasecTest />}
+            {step === 8 && <AptitudeTest />}
 
             {/* Navigation Buttons */}
             <div className="flex justify-between items-center pt-6">
-              {step > 1 ? (
+              {step > 1 && (
                 <button
                   type="button"
                   onClick={() => setStep((prev) => prev - 1)}
-                  className="px-6 py-2 rounded-lg bg-gray-100 text-gray-700 font-medium hover:bg-gray-200 transition"
+                  className={`px-6 py-2 font-medium transition ${
+                    flatStyle
+                      ? "bg-transparent border border-gray-400 text-gray-700 hover:bg-gray-100"
+                      : " bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-md"
+                  }`}
                 >
                   ← Back
                 </button>
-              ) : <div></div>}
+              )}
 
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className={`px-6 py-2 rounded-lg text-white font-semibold transition ${
-                  step === 5
-                    ? "bg-green-600 hover:bg-green-700 flex items-center gap-2"
-                    : "bg-indigo-600 hover:bg-indigo-700"
-                }`}
-              >
-                {step === 5 ? (
-                  <>
-                    {isSubmitting && (
-                      <svg className="animate-spin h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10"
-                          stroke="currentColor" strokeWidth="4" />
-                        <path className="opacity-75" fill="currentColor"
-                          d="M4 12a8 8 0 018-8v8H4z" />
-                      </svg>
-                    )}
-                    {isSubmitting ? "Submitting..." : "Submit"}
-                  </>
-                ) : (
-                  "Next →"
-                )}
-              </button>
+               {/* Next / Submit button logic */}
+  {step < 5 && (
+    <button
+      type="button"
+      onClick={handleNext}
+      className={`px-6 py-2 font-semibold text-white transition ${
+        flatStyle
+          ? "bg-indigo-600 hover:bg-indigo-700"
+          : " bg-indigo-600 hover:bg-indigo-700 rounded-md"
+      }`}
+    >
+      Next →
+    </button>
+  )}
+
+  {step === 5 &&  (
+    <button
+      type="button"
+      onClick={handleNext} // triggers final submission
+      className={`px-6 py-2 font-semibold text-white transition ${
+        flatStyle
+          ? "bg-green-600 hover:bg-green-700"
+          : " bg-green-600 hover:bg-green-700 rounded-md"
+      }`}
+    >
+      Submit
+    </button>
+  )}
+
+    {step === 8 && (
+    <button
+      type="button"
+      onClick={onSubmit} // final submission after RIASEC
+      className={`px-6 py-2 font-semibold text-white transition ${
+        flatStyle
+          ? "bg-green-600 hover:bg-green-700"
+          : " bg-green-600 hover:bg-green-700 rounded-md"
+      }`}
+    >
+      Submit All
+    </button>
+  )}
+
+  {step > 5 && (
+    <button
+      type="button"
+      onClick={handleNext}
+      className={`px-6 py-2 font-semibold text-white transition ${
+        flatStyle
+          ? "bg-indigo-600 hover:bg-indigo-700"
+          : " bg-indigo-600 hover:bg-indigo-700 rounded-md"
+      }`}
+    >
+      Next →
+    </button>
+  )}
             </div>
           </form>
         </FormProvider>

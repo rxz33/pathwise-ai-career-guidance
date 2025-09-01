@@ -1,11 +1,18 @@
-import React from "react";
+import React, { useState } from "react";
 import { useFormContext } from "react-hook-form";
 
 const StepLearningRoadmap = () => {
-  const {
-    register,
-    formState: { errors },
-  } = useFormContext();
+  const { register, formState: { errors } } = useFormContext();
+
+  const [studyPlanValue, setStudyPlanValue] = useState("");
+  const [learningModeValue, setLearningModeValue] = useState("");
+  const [openToExploreValue, setOpenToExploreValue] = useState("");
+  const [riskTakingValue, setRiskTakingValue] = useState("");
+
+  const studyPlanOptions = ["Masters", "Certifications", "MBA", "Diploma", "Other"];
+  const learningModeOptions = ["Self-paced", "Classroom", "Online Courses", "Workshops", "Other"];
+  const openToExploreOptions = ["Yes", "No", "Maybe", "Other"];
+  const riskTakingOptions = ["Low", "Medium", "High", "Very High", "Other"];
 
   return (
     <div className="space-y-6">
@@ -13,63 +20,54 @@ const StepLearningRoadmap = () => {
 
       {/* Study Plan */}
       <div>
-        <label className="block mb-1">Your Study Plan</label>
-        <input
-          type="text"
-          placeholder="e.g. Masters, Certifications, MBA"
-          {...register("studyPlan")}
-          className="input"
-        />
+        <label>Your Study Plan</label>
+        <select {...register("studyPlan")} className="input" onChange={(e) => setStudyPlanValue(e.target.value)}>
+          <option value="">Select</option>
+          {studyPlanOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+        </select>
+        {studyPlanValue === "Other" && (
+          <input type="text" {...register("studyPlanOther")} placeholder="Please specify" className="input mt-2" />
+        )}
         {errors.studyPlan && <p className="text-red-500 text-sm">{errors.studyPlan.message}</p>}
       </div>
 
       {/* Preferred Learning Mode */}
       <div>
-        <label className="block mb-1">Preferred Learning Mode</label>
-        <div className="space-y-1">
-          <label className="block">
-            <input type="checkbox" value="Self-paced" {...register("preferredLearning")} />
-            <span className="ml-2">Self-paced</span>
-          </label>
-          <label className="block">
-            <input type="checkbox" value="Classroom" {...register("preferredLearning")} />
-            <span className="ml-2">Classroom</span>
-          </label>
-          <label className="block">
-            <input type="checkbox" value="Online Courses" {...register("preferredLearning")} />
-            <span className="ml-2">Online Courses</span>
-          </label>
-        </div>
-        {errors.preferredLearning && (
-          <p className="text-red-500 text-sm">{errors.preferredLearning.message}</p>
+        <label>Preferred Learning Mode</label>
+        <select {...register("preferredLearning")} className="input" onChange={(e) => setLearningModeValue(e.target.value)}>
+          <option value="">Select</option>
+          {learningModeOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+        </select>
+        {learningModeValue === "Other" && (
+          <input type="text" {...register("preferredLearningOther")} placeholder="Please specify" className="input mt-2" />
         )}
+        {errors.preferredLearning && <p className="text-red-500 text-sm">{errors.preferredLearning.message}</p>}
       </div>
 
-      {/* Open to Explore New Fields */}
+      {/* Open to Explore */}
       <div>
-        <label className="block mb-1">Are you open to exploring new fields?</label>
-        <select {...register("openToExplore")} className="input">
+        <label>Are you open to exploring new fields?</label>
+        <select {...register("openToExplore")} className="input" onChange={(e) => setOpenToExploreValue(e.target.value)}>
           <option value="">Select</option>
-          <option value="Yes">Yes</option>
-          <option value="No">No</option>
+          {openToExploreOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
         </select>
-        {errors.openToExplore && (
-          <p className="text-red-500 text-sm">{errors.openToExplore.message}</p>
+        {openToExploreValue === "Other" && (
+          <input type="text" {...register("openToExploreOther")} placeholder="Please specify" className="input mt-2" />
         )}
+        {errors.openToExplore && <p className="text-red-500 text-sm">{errors.openToExplore.message}</p>}
       </div>
 
       {/* Risk Taking Level */}
       <div>
-        <label className="block mb-1">Your Risk Taking Level</label>
-        <select {...register("riskTaking")} className="input">
+        <label>Your Risk Taking Level</label>
+        <select {...register("riskTaking")} className="input" onChange={(e) => setRiskTakingValue(e.target.value)}>
           <option value="">Select</option>
-          <option value="Low">Low</option>
-          <option value="Medium">Medium</option>
-          <option value="High">High</option>
+          {riskTakingOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
         </select>
-        {errors.riskTaking && (
-          <p className="text-red-500 text-sm">{errors.riskTaking.message}</p>
+        {riskTakingValue === "Other" && (
+          <input type="text" {...register("riskTakingOther")} placeholder="Please specify" className="input mt-2" />
         )}
+        {errors.riskTaking && <p className="text-red-500 text-sm">{errors.riskTaking.message}</p>}
       </div>
     </div>
   );

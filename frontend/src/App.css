@@ -1,42 +1,64 @@
+/* Root container */
 #root {
-  max-width: 1280px;
+  max-width: 1200px;
   margin: 0 auto;
   padding: 2rem;
+  font-family: "Inter", "Segoe UI", "Roboto", sans-serif;
   text-align: center;
+  color: #1f2937; /* dark gray for modern text */
+  background-color: #f9fafb; /* subtle light background */
 }
 
+/* Logo styling */
 .logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
+  height: 5.5em;
+  padding: 1em;
+  border-radius: 16px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
+
 .logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
+  transform: scale(1.08);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
 }
+
 .logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+  transform: scale(1.1) rotate(5deg);
+  box-shadow: 0 10px 28px rgba(97, 218, 251, 0.3);
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
-}
-
+/* Cards */
 .card {
-  padding: 2em;
+  background: white;
+  padding: 2rem;
+  margin: 1.5rem auto;
+  border-radius: 20px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
+.card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12);
+}
+
+/* Docs link */
 .read-the-docs {
-  color: #888;
+  color: #6b7280; /* neutral gray */
+  font-size: 0.95rem;
+  transition: color 0.2s ease;
+}
+
+.read-the-docs:hover {
+  color: #111827; /* darker hover */
+}
+
+/* Responsive tweak */
+@media (max-width: 768px) {
+  #root {
+    padding: 1.5rem;
+  }
+  .card {
+    padding: 1.5rem;
+  }
 }

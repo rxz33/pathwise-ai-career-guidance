@@ -2,54 +2,135 @@
 @tailwind components;
 @tailwind utilities;
 
-.input {
-    @apply w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400;
-  }
-  
-  /* index.css */
-.error {
-  color: red;  /* You can change this color to any shade you like */
-  font-size: 0.875rem;  /* Optional: Adjust the size of the error message */
-  font-weight: 500;  /* Optional: Make the text a little bolder */
-  margin-top: 0.25rem;  /* Optional: Add some space above the error message */
-  display: inline-block;  /* Makes the error message inline with the field */
-}
-/* index.css */
+/* =============================
+   Global Styles
+============================= */
 html {
-  font-size: 16px; /* Default font size for the page */
+  font-size: 16px; 
+  scroll-behavior: smooth; /* smooth scrolling */
 }
 
 body {
-  font-family: 'Arial', sans-serif;
+  font-family: 'Inter', 'Segoe UI', Roboto, sans-serif; /* modern western font stack */
+  background-color: #f9fafb; /* light gray background */
+  color: #1f2937; /* cool gray text */
+  line-height: 1.6;
 }
 
+/* Headings */
 h1, h2, h3, h4, h5, h6 {
-  font-weight: 600;
+  font-weight: 700;
+  color: #111827;
+}
+
+h1 {
+  font-size: 2rem;
+  line-height: 2.5rem;
 }
 
 h2 {
-  font-size: 1.5rem; /* Adjust size of h2 headers */
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
 }
 
 h3 {
   font-size: 1.25rem;
 }
 
+/* Labels */
 label {
-  font-size: 1rem; /* Adjust size of labels */
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #374151;
 }
 
-input, textarea, select {
-  font-size: 1rem; /* Adjust input and textarea text */
+/* =============================
+   Form Inputs
+============================= */
+.input {
+  @apply w-full p-3 border border-gray-300 rounded-xl 
+         focus:outline-none focus:ring-2 focus:ring-indigo-500 
+         shadow-sm transition duration-200 ease-in-out;
+  background-color: #ffffff;
 }
 
-/* You can also create classes for specific elements you want to style */
-.input-text {
-  font-size: 1.1rem;
+.input:focus {
+  border-color: #6366f1; /* Indigo border on focus */
+  transform: scale(1.01); /* Subtle zoom effect */
 }
 
+textarea {
+  @apply w-full p-3 border border-gray-300 rounded-xl resize-none 
+         focus:outline-none focus:ring-2 focus:ring-indigo-500;
+}
+
+/* Dropdowns */
 .select-dropdown {
-  font-size: 1rem;
+  @apply w-full p-3 border border-gray-300 rounded-xl 
+         focus:ring-2 focus:ring-indigo-500 cursor-pointer;
+  background-color: #ffffff;
 }
 
-/* You can add more global typography rules here */
+/* =============================
+   Error Messages
+============================= */
+.error {
+  color: #dc2626; /* red-600 */
+  font-size: 0.85rem;
+  font-weight: 500;
+  margin-top: 0.25rem;
+  display: block;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-3px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* =============================
+   Buttons
+============================= */
+.btn-primary {
+  @apply px-6 py-2 rounded-xl text-white font-semibold 
+         bg-indigo-600 hover:bg-indigo-700 
+         focus:outline-none focus:ring-2 focus:ring-indigo-400
+         transition-all duration-200 shadow-md;
+}
+
+.btn-secondary {
+  @apply px-6 py-2 rounded-xl text-gray-700 font-medium 
+         bg-gray-200 hover:bg-gray-300 
+         focus:outline-none focus:ring-2 focus:ring-gray-400
+         transition-all duration-200;
+}
+
+/* =============================
+   Cards / Containers
+============================= */
+.card {
+  @apply bg-white rounded-2xl shadow-lg p-6 transition transform;
+}
+
+.card:hover {
+  @apply scale-105; /* Tailwind-safe scaling */
+  box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+}
+
+/* Engaging Hover Effect */
+.card:hover {
+  box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+}
+
+/* =============================
+   Utility Enhancements
+============================= */
+.input-text {
+  font-size: 1.05rem;
+  font-weight: 400;
+}
+
+.read-the-docs {
+  color: #6b7280; /* gray-500 */
+  font-size: 0.9rem;
+}

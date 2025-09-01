@@ -2,13 +2,13 @@ from fastapi import FastAPI, Request, HTTPException
 from fastapi.responses import JSONResponse
 from app.utils.logger import logger
 from app.core.config import setup_cors
-# from app.routes import user_routes
 from app.database import create_indexes
 from app.routes.submit_info import router as submit_info_router
 from app.routes.cross_exam import router as cross_exam_router
 from app.routes.career_result import router as career_result_router
 from app.routes.evaluate_cross_exam import router as evaluate_cross_exam_router
 from app.routes.result import router as result_router
+from app.routes.tests import router as tests_router
 
 app = FastAPI(
     title="AI Career Guidance System",
@@ -44,3 +44,4 @@ async def startup():
     await create_indexes()
 
 app.include_router(result_router)
+app.include_router(tests_router)

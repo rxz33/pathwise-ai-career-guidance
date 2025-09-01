@@ -1,20 +1,35 @@
 import { z } from "zod";
 
 export const LearningRoadmaps = z.object({
-  studyPlan: z
-    .string()
-    .min(2, "Please specify your study plan")
-    .optional(),
+  // Study Plan
+  studyPlan: z.string().optional(),
+  studyPlanOther: z.string().optional()
+    .refine((val, ctx) => {
+      const parent = ctx.parent;
+      return parent.studyPlan !== "Other" || (val && val.trim().length > 0);
+    }, "Please specify your study plan"),
 
-  preferredLearning: z
-    .array(z.string())
-    .optional(),
+  // Preferred Learning Mode
+  preferredLearning: z.string().optional(),
+  preferredLearningOther: z.string().optional()
+    .refine((val, ctx) => {
+      const parent = ctx.parent;
+      return parent.preferredLearning !== "Other" || (val && val.trim().length > 0);
+    }, "Please specify your preferred learning mode"),
 
-  openToExplore: z
-    .enum(["Yes", "No"])
-    .optional(),
+  // Open to Explore New Fields
+  openToExplore: z.string().optional(),
+  openToExploreOther: z.string().optional()
+    .refine((val, ctx) => {
+      const parent = ctx.parent;
+      return parent.openToExplore !== "Other" || (val && val.trim().length > 0);
+    }, "Please specify"),
 
-  riskTaking: z
-    .enum(["Low", "Medium", "High"])
-    .optional(),
+  // Risk Taking Level
+  riskTaking: z.string().optional(),
+  riskTakingOther: z.string().optional()
+    .refine((val, ctx) => {
+      const parent = ctx.parent;
+      return parent.riskTaking !== "Other" || (val && val.trim().length > 0);
+    }, "Please specify your risk level"),
 });
