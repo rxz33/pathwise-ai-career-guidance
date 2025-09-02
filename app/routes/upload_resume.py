@@ -1,34 +1,9 @@
 # app/routes/upload_resume.py
 from fastapi import APIRouter, UploadFile, File, Form, HTTPException
 from app.services import mongo_service
-import PyPDF2
-import docx
-import io
+from app.services.resume_parser import parse_resume  # import the parser
 
 router = APIRouter()
-
-def parse_resume(file_bytes: bytes, content_type: str) -> str:
-    """
-    Extract text from PDF or DOCX resumes.
-    """
-    text = ""
-    try:
-        if content_type == "application/pdf":
-            reader = PyPDF2.PdfReader(io.BytesIO(file_bytes))
-            for page in reader.pages:
-                text += page.extract_text() or ""
-        elif content_type in [
-            "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-            "application/msword"
-        ]:
-            doc = docx.Document(io.BytesIO(file_bytes))
-            for para in doc.paragraphs:
-                text += para.text + "\n"
-        else:
-            text = ""  # unsupported format (optional: raise exception)
-    except Exception as e:
-        text = f"Error parsing resume: {str(e)}"
-    return text.strip()
 
 @router.post("/upload_resume")
 async def upload_resume(email: str = Form(...), resume: UploadFile = File(...)):
@@ -36,16 +11,18 @@ async def upload_resume(email: str = Form(...), resume: UploadFile = File(...)):
         # ✅ Read file bytes
         file_content = await resume.read()
 
-        # ✅ Parse resume text
-        extracted_text = parse_resume(file_content, resume.content_type)
+        # ✅ Parse resume using the centralized parser service
+        parsed_data = parse_resume(file_content, resume.content_type)
 
-        # ✅ Prepare data to store
+        # ✅ Prepare data to store in MongoDB
         resume_data = {
             "resume": {
                 "filename": resume.filename,
                 "content_type": resume.content_type,
                 "data": file_content,
-                "parsed_text": extracted_text
+                "parsed_text": parsed_data["extracted_text"],
+                "skills": parsed_data.get("skills", []),
+                "has_experience": parsed_data.get("has_experience", "No")
             }
         }
 
@@ -58,7 +35,9 @@ async def upload_resume(email: str = Form(...), resume: UploadFile = File(...)):
         return {
             "message": "Resume uploaded & parsed successfully",
             "email": email,
-            "parsed_text_preview": extracted_text[:300]  # preview first 300 chars
+            "parsed_text_preview": parsed_data["extracted_text"][:300],  # preview first 300 chars
+            "skills": parsed_data.get("skills", []),
+            "has_experience": parsed_data.get("has_experience", "No")
         }
 
     except Exception as e:

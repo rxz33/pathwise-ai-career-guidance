@@ -101,21 +101,6 @@ class Optionals(BaseModel):
     class Config:
         extra = "allow"
 
-# ------------------- Final Combined Model -------------------
-class UserData(BaseModel):
-    userId: Optional[str] = None
-    createdAt: datetime = Field(default_factory=datetime.utcnow)
-    updatedAt: datetime = Field(default_factory=datetime.utcnow)
-
-    personalInfo: Optional[PersonalInfos] = None
-    interests: Optional[Interests] = None
-    strengthsAndWeaknesses: Optional[StrengthWs] = None
-    learningRoadmap: Optional[LearningRoadmaps] = None
-    optionalFields: Optional[Optionals] = None
-
-    class Config:
-        extra = "allow"
-        
 class BigFivePayload(BaseModel):
     email: EmailStr
     test: str
@@ -130,6 +115,59 @@ class AptiPayload(BaseModel):
     email: EmailStr
     test: str
     scores: dict
+    
+class Tests(BaseModel):
+    bigFive: Optional[dict] = None
+    riasec: Optional[dict] = None
+    aptitude: Optional[dict] = None
+    
+# ------------------- Resume Data -------------------
+class ResumeData(BaseModel):
+    extractedText: Optional[str] = None
+    skills: Optional[List[str]] = []
+    projects: Optional[List[str]] = []
+    certifications: Optional[List[str]] = []
+    hasExperience: Optional[str] = None
+
+    class Config:
+        extra = "allow"
+
+# ------------------- AI Insights (Agentic AI will fill this) -------------------
+class AIInsights(BaseModel):
+    consistencyReport: Optional[str] = None  # cross-check between resume & form & tests
+    careerGaps: Optional[List[str]] = []
+    personalizedRecommendations: Optional[List[str]] = []
+    careerRoadmap: Optional[dict] = None
+
+    class Config:
+        extra = "allow"
+
+# ------------------- Final Combined Model -------------------
+class UserData(BaseModel):
+    userId: Optional[str] = None
+    email: Optional[EmailStr] = None  # ✅ added
+    createdAt: datetime = Field(default_factory=datetime.utcnow)
+    updatedAt: datetime = Field(default_factory=datetime.utcnow)
+
+    personalInfo: Optional[PersonalInfos] = None
+    interests: Optional[Interests] = None
+    strengthsAndWeaknesses: Optional[StrengthWs] = None
+    learningRoadmap: Optional[LearningRoadmaps] = None
+    optionalFields: Optional[Optionals] = None
+
+    # ✅ Resume Parsing Results
+    resume: Optional[ResumeData] = None
+
+    # ✅ Tests
+    tests: Optional[Tests] = None
+
+    # ✅ Agentic AI Results
+    aiInsights: Optional[AIInsights] = None
+
+    class Config:
+        extra = "allow"
+
+
     
 # ------------------- Cross Examination Input -------------------
 class CrossExamInput(BaseModel):
