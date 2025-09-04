@@ -7,7 +7,8 @@ async def call_llm(provider: str, prompt: str, **kwargs) -> str:
     if provider == "groq":
         return await ask_groq(prompt, **kwargs)
     elif provider == "gemini":
-        return await ask_gemini(prompt, **kwargs)
+        # temporarily use OpenAI if Gemini fails
+        return await ask_openai(prompt, **kwargs)
     elif provider == "openai":
         return await ask_openai(prompt, **kwargs)
     else:

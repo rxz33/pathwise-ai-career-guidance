@@ -8,26 +8,13 @@ db = client["pathwise_db"]
 user_collection = db["user_data"]
 
 
+# app/services/mongo_service.py
 async def update_user_by_email(email: str, update_data: dict):
-    """
-    Update a user by email without cleaning.
-    """
-    if not email:
-        raise ValueError("Email is required")
-
-    if any(k.startswith("$") for k in update_data.keys()):
-        result = await user_collection.update_one(
-            {"personal.email": email},
-            update_data,
-            upsert=True
-        )
-    else:
-        result = await user_collection.update_one(
-            {"personal.email": email},
-            {"$set": update_data},
-            upsert=True
-        )
-    return result
+    return await user_collection.update_one(
+        {"personal.email": email},  # make sure your email field path matches
+        {"$set": update_data},
+        upsert=True
+    )
 
 
 async def get_user_by_email(email: str):

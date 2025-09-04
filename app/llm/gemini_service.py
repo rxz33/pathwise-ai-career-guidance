@@ -14,7 +14,7 @@ if not GEMINI_API_KEY:
     raise EnvironmentError("GEMINI_API_KEY not found in .env file.")
 
 genai.configure(api_key=GEMINI_API_KEY)
-MODEL_NAME = "gemini-pro"  # text model
+MODEL_NAME = "gemini-1"  # text model
 
 async def ask_gemini(prompt: str, temperature: float = 0.7, max_tokens: int = 1024) -> str:
     try:

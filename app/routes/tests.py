@@ -6,9 +6,12 @@ from app.schemas.user_data import BigFivePayload, RiasecPayload, AptiPayload
 router = APIRouter()
 
 async def save_test(email: str, test_name: str, scores: dict):
-    # Save test directly under "tests"
-    await mongo_service.update_user_by_email(email, {"tests": {test_name: scores}})
-    return {"tests": {test_name: scores}}
+    """
+    Save test under 'tests' object in user document without overwriting existing tests.
+    """
+    update_data = {f"tests.{test_name}": scores}  # dot notation merges
+    await mongo_service.update_user_by_email(email, update_data)
+    return {test_name: scores}
 
 @router.post("/big-five")
 async def submit_big_five(payload: BigFivePayload):
