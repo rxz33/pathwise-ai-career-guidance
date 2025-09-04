@@ -1,20 +1,40 @@
-from app.services.cross_exam_service import analyze_cross_exam_answers
+from typing import Dict, Any
+
+# Import agents
+from app.agents.cross_exam_analyzer import CrossExamAnalyzer
+from app.agents.resume_analyzer import ResumeAnalyzer
+from app.agents.gap_analyzer import GapAnalyzer
+from app.agents.recommender import RecommenderAgent
+from app.config import AGENT_LLM_MAPPING
+
 
 class AgentPipeline:
+    """
+    Orchestrates execution of multiple agents in sequence.
+    Connects resume, tests, cross-exam, gap analysis, and recommendations.
+    """
+
     def __init__(self, email: str):
         self.email = email
-        self.results = {}
 
-    async def run_cross_exam(self, answers: dict):
-        cross_exam_result = await analyze_cross_exam_answers(self.email, answers)
-        self.results.update(cross_exam_result)
-        return cross_exam_result
+    async def run_pipeline(self, payload: Dict[str, Any]) -> Dict[str, Any]:
+        results = {}
 
-    async def run_pipeline(self, user_input: dict):
-        """
-        Dummy pipeline manager – later we’ll connect resume parser, gap analysis, etc.
-        For now, only runs cross-exam analysis.
-        """
-        answers = user_input.get("cross_exam_answers", {})
-        await self.run_cross_exam(answers)
-        return self.results
+        # ----------------- 1. Cross-Exam Analyzer -----------------
+        cross_exam = CrossExamAnalyzer(self.email, provider=AGENT_LLM_MAPPING["cross_exam"])
+        results["cross_exam"] = await cross_exam.run(payload.get("cross_exam_answers", {}))
+
+        # ----------------- 2. Resume Analyzer -----------------
+        resume_agent = ResumeAnalyzer(self.email, provider=AGENT_LLM_MAPPING["resume"])
+        results["resume"] = await resume_agent.run(payload.get("resume_text", ""))
+
+        # ----------------- 3. Gap Analyzer -----------------
+        gap_agent = GapAnalyzer(self.email, provider=AGENT_LLM_MAPPING["gap_analysis"])
+        results["career_gaps"] = await gap_agent.run(results)
+
+        # ----------------- 4. Recommendation Agent -----------------
+        recommender = RecommenderAgent(self.email, provider=AGENT_LLM_MAPPING["recommender"])
+        results["recommendations"] = await recommender.run(results)
+
+        # ----------------- Final Centralized Result -----------------
+        return results

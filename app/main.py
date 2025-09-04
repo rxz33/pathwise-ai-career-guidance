@@ -9,7 +9,7 @@ from app.routes.career_result import router as career_result_router
 from app.routes.evaluate_cross_exam import router as evaluate_cross_exam_router
 from app.routes.result import router as result_router
 from app.routes.tests import router as tests_router
-from app.routes.pipeline_routes import pipeline_router
+from app.routes.pipeline_routes import router as pipeline_router
 app = FastAPI(
     title="AI Career Guidance System",
     version="1.0.0",
