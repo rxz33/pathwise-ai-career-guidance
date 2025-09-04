@@ -1,7 +1,7 @@
 # services/llm_service.py
-from llm.groq_service import ask_groq
-from llm.gemini_service import ask_gemini
-from llm.openai_service import ask_openai
+from ..llm.groq_service import ask_groq
+from ..llm.gemini_service import ask_gemini
+from ..llm.openai_service import ask_openai
 
 async def call_llm(provider: str, prompt: str, **kwargs) -> str:
     if provider == "groq":
