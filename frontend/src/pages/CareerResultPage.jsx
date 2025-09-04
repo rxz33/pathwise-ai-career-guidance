@@ -45,34 +45,106 @@ function CareerResultPage() {
   }, [email, navigate]);
 
   // ✅ Updated PDF Styling
-  const downloadPDF = () => {
-    const doc = new jsPDF();
+const downloadPDF = () => {
+  const doc = new jsPDF({ orientation: "portrait", unit: "pt", format: "a4" });
+  const margin = 40;
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
+  const lineHeight = 18;
+  let cursorY = margin;
 
-    // Change font (options: helvetica, times, courier)
-    doc.setFont("helvetica", "normal");
+  // Title
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(20);
+  doc.text("🎓 Career Guidance Report", pageWidth / 2, cursorY, { align: "center" });
+  cursorY += 40;
+
+  // Helper to render section with a table
+  const addTableSection = (title, data) => {
+    // Section heading
+    if (cursorY + 2 * lineHeight > pageHeight - margin) {
+      doc.addPage();
+      cursorY = margin;
+    }
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(16);
+    doc.text(title, margin, cursorY);
+    cursorY += lineHeight + 5;
+
+    // Table headers
+    doc.setFont("helvetica", "bold");
     doc.setFontSize(13);
+    const headers = ["Trait", "Score"];
+    const colWidths = [200, 100];
+    let colX = margin;
+    headers.forEach((h, i) => {
+      doc.text(h, colX, cursorY);
+      colX += colWidths[i];
+    });
+    cursorY += lineHeight;
 
-    const pageWidth = doc.internal.pageSize.getWidth();
-    const pageHeight = doc.internal.pageSize.getHeight();
-    const margin = 20;
-    const lineHeight = 7;
-
-    const text = result || "No data available.";
-    const lines = doc.splitTextToSize(text, pageWidth - margin * 2);
-
-    let cursorY = 30;
-
-    lines.forEach((line) => {
+    // Table content
+    doc.setFont("times", "normal");
+    Object.entries(data).forEach(([key, value]) => {
       if (cursorY + lineHeight > pageHeight - margin) {
         doc.addPage();
         cursorY = margin;
       }
-      doc.text(line, margin, cursorY);
+      doc.text(key, margin, cursorY);
+      doc.text(String(value), margin + colWidths[0], cursorY);
       cursorY += lineHeight;
     });
 
-    doc.save("career-guidance-result.pdf");
+    cursorY += lineHeight; // extra spacing after section
   };
+
+  // Extract data from localStorage
+  const userData = JSON.parse(localStorage.getItem("user_form_data")) || {};
+  const bigFive = userData.tests?.bigFive || {};
+  const riasec = userData.tests?.riasec || {};
+  const aptitude = userData.tests?.aptitude || {};
+  const finalAnalysis = userData.finalAnalysis || "No final analysis available.";
+
+  // Add each section
+  addTableSection("🧠 Big Five Personality Test", bigFive);
+  addTableSection("💼 RIASEC Test", riasec);
+  addTableSection("📊 Aptitude Test", aptitude);
+
+  // Final Analysis
+  if (cursorY + 3 * lineHeight > pageHeight - margin) {
+    doc.addPage();
+    cursorY = margin;
+  }
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(16);
+  doc.text("📌 Career Analysis Summary", margin, cursorY);
+  cursorY += lineHeight + 5;
+
+  doc.setFont("times", "normal");
+  doc.setFontSize(13);
+  const lines = doc.splitTextToSize(finalAnalysis, pageWidth - margin * 2);
+  lines.forEach((line) => {
+    if (cursorY + lineHeight > pageHeight - margin) {
+      doc.addPage();
+      cursorY = margin;
+    }
+    doc.text(line, margin, cursorY);
+    cursorY += lineHeight;
+  });
+
+  // Footer with page numbers
+  const pageCount = doc.internal.getNumberOfPages();
+  for (let i = 1; i <= pageCount; i++) {
+    doc.setPage(i);
+    doc.setFont("helvetica", "italic");
+    doc.setFontSize(10);
+    doc.text(`Page ${i} of ${pageCount}`, pageWidth - margin, pageHeight - 20, { align: "right" });
+  }
+
+  doc.save("career-guidance-report.pdf");
+};
+
+
 
   return (
     <div className="max-w-4xl mx-auto p-6">

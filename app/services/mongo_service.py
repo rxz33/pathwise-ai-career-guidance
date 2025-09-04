@@ -7,32 +7,26 @@ client = AsyncIOMotorClient(MONGO_URI)
 db = client["pathwise_db"]
 user_collection = db["user_data"]
 
-
-# app/services/mongo_service.py
 async def update_user_by_email(email: str, update_data: dict):
-    return await user_collection.update_one(
-        {"personal.email": email},  # make sure your email field path matches
-        {"$set": update_data},
-        upsert=True
-    )
-
+    """
+    Update user document by email.
+    """
+    result = await user_collection.update_one({"personal.email": email}, {"$set": update_data})
+    return result
 
 async def get_user_by_email(email: str):
-    return await user_collection.find_one({"personal.email": email})
-
-
-async def get_clean_user_data(email: str) -> dict:
     """
-    Just fetch merged profile (rawUserInfo + rawResume) without cleaning.
+    Fetch user document by email.
     """
     user = await user_collection.find_one({"personal.email": email})
-    if not user:
-        return {}
+    return user
 
-    merged = {
-        "email": email,
-        "userInfo": user.get("rawUserInfo", {}),
-        "resume": user.get("rawResume", {})
-    }
-
-    return merged
+async def update_final_analysis(email: str, analysis: dict):
+    """
+    Store final career analysis under 'finalAnalysis' field.
+    """
+    result = await user_collection.update_one(
+        {"personal.email": email},
+        {"$set": {"finalAnalysis": analysis}}
+    )
+    return result
