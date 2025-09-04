@@ -71,7 +71,6 @@ const MultiStepForm = ({ flatStyle = false }) => {
     try {
       setIsSubmitting(true);
 
-      // Upload resume if available
       if (formData.hasResume === "Yes" && formData.resumeFile?.length > 0) {
         const formDataUpload = new FormData();
         formDataUpload.append("email", email);
@@ -79,7 +78,6 @@ const MultiStepForm = ({ flatStyle = false }) => {
         await fetch("http://localhost:8000/upload-resume", { method: "POST", body: formDataUpload });
       }
 
-      // Submit other form info
       const response = await fetch("http://localhost:8000/submit-info", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -93,10 +91,8 @@ const MultiStepForm = ({ flatStyle = false }) => {
       setIsSuccess(true);
       toast.success("Form submitted successfully!");
 
-      // Navigate to Loading Page (triggering cross-exam)
-      setTimeout(() => {
-        navigate("/loading");
-      }, 1000);
+      // Navigate to loading page for cross-exam
+      setTimeout(() => navigate("/loading"), 1000);
 
     } catch (error) {
       console.error(error);
@@ -111,37 +107,46 @@ const MultiStepForm = ({ flatStyle = false }) => {
     if (!valid) return;
 
     if (step === 5) {
-      // Step 5 → go to loading page for personality tests
-      setStep(6); // Step 6 is loading page
-    } else if (step < 8) {
+      setStep(6); // Loading personality tests
+    } else if (step < 9) {
       setStep((prev) => prev + 1);
-    } else if (step === 8) {
-      // Final submission after last test
-      onSubmit();
+    } else if (step === 9) {
+      onSubmit(); // Submit All on last test
     }
   };
+
+  // Auto-advance Step 6 → Step 7
+  useEffect(() => {
+    if (step === 6) {
+      const timer = setTimeout(() => setStep(7), 2000); // 2 seconds loading
+      return () => clearTimeout(timer);
+    }
+  }, [step]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#f2f4f8] via-white to-[#e8edf5] flex justify-center items-start py-10 px-4">
       <div className="w-full max-w-4xl space-y-8">
-        {/* Progress Bar */}
-        <div className={`w-full ${flatStyle ? "h-1 bg-gray-300" : "bg-gray-200 rounded-full h-3"} mb-8 overflow-hidden`}>
-          <div
-            className={`${flatStyle ? "bg-indigo-600" : "bg-indigo-500 rounded-full"} h-full transition-all duration-500 ease-in-out`}
-            style={{ width: `${(step / 8) * 100}%` }}
-          ></div>
-        </div>
 
-        {/* Success Message */}
+        {/* Progress Bar & Step Count only for Steps 1–5 */}
+        {step <= 5 && (
+          <>
+            <div className={`w-full ${flatStyle ? "h-1 bg-gray-300" : "bg-gray-200 rounded-full h-3"} mb-8 overflow-hidden`}>
+              <div
+                className={`${flatStyle ? "bg-indigo-600" : "bg-indigo-500 rounded-full"} h-full transition-all duration-500 ease-in-out`}
+                style={{ width: `${(step / 5) * 100}%` }}
+              ></div>
+            </div>
+            <h2 className="text-2xl md:text-3xl font-semibold text-gray-800 text-center mb-4">
+              Step {step} of 5
+            </h2>
+          </>
+        )}
+
         {isSuccess && <div className="text-green-600 text-center font-medium text-lg mb-6">✅ Submitted successfully!</div>}
-
-        <h2 className="text-2xl md:text-3xl font-semibold text-gray-800 text-center mb-4">
-          Step {step} of 8
-        </h2>
 
         <FormProvider {...methods}>
           <form onSubmit={(e) => e.preventDefault()} className="space-y-10">
-            {/* Step Components */}
+
             {step === 1 && <PersonalInfo />}
             {step === 2 && <Interest />}
             {step === 3 && <StrengthW />}
@@ -158,6 +163,7 @@ const MultiStepForm = ({ flatStyle = false }) => {
 
             {/* Navigation Buttons */}
             <div className="flex justify-between items-center pt-6">
+              {/* Back button (not on Step 6) */}
               {step > 1 && step !== 6 && (
                 <button type="button" onClick={() => setStep((prev) => prev - 1)}
                   className={`px-6 py-2 font-medium transition ${flatStyle ? "bg-transparent border border-gray-400 text-gray-700 hover:bg-gray-100" : " bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-md"}`}>
@@ -165,14 +171,15 @@ const MultiStepForm = ({ flatStyle = false }) => {
                 </button>
               )}
 
-              {/* Next / Submit All Button */}
+              {/* Next / Submit All */}
               {step !== 6 && (
                 <button type="button" onClick={handleNext}
                   className={`px-6 py-2 font-semibold text-white transition ${flatStyle ? "bg-indigo-600 hover:bg-indigo-700" : " bg-indigo-600 hover:bg-indigo-700 rounded-md"}`}>
-                  {step === 8 ? "Submit All" : "Next →"}
+                  {step === 9 ? "Submit All" : "Next →"}
                 </button>
               )}
             </div>
+
           </form>
         </FormProvider>
       </div>
