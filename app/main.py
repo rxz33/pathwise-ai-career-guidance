@@ -12,6 +12,8 @@ from app.routes.result import router as result_router
 from app.routes.tests import router as tests_router
 from app.routes.upload_resume import router as upload_resume_router
 # from app.routes.pipeline_routes import router as pipeline_router
+from app.routes.clean_profile import router as clean_router
+
 app = FastAPI(
     title="AI Career Guidance System",
     version="1.0.0",
@@ -61,4 +63,5 @@ async def startup():
 app.include_router(result_router)
 app.include_router(tests_router)
 app.include_router(upload_resume_router)
+app.include_router(clean_router)
 # app.include_router(pipeline_router)

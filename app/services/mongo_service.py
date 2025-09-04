@@ -7,53 +7,45 @@ client = AsyncIOMotorClient(MONGO_URI)
 db = client["pathwise_db"]
 user_collection = db["user_data"]
 
+
 async def update_user_by_email(email: str, update_data: dict):
     """
-    Updates a user by email. Creates a new document if not exists.
-    Merges nested objects like tests instead of overwriting them.
+    Update a user by email without cleaning.
     """
-    if "personal" not in update_data:
-        update_data["personal"] = {}
-    update_data["personal"]["email"] = email
+    if not email:
+        raise ValueError("Email is required")
 
-    # Prepare $set with nested keys
-    set_data = {}
-    for key, value in update_data.items():
-        if isinstance(value, dict):
-            for sub_key, sub_val in value.items():
-                set_data[f"{key}.{sub_key}"] = sub_val
-        else:
-            set_data[key] = value
-
-    return await user_collection.update_one(
-        {"personal.email": email},
-        {"$set": set_data},
-        upsert=True
-    )
-
-
-# async def update_user_by_email(email: str, update_data: dict):
-#     """
-#     Updates a user by email. If the user doesn't exist, creates a new document.
-#     Ensures all test results go under the same document for this email.
-#     """
-#     # Ensure email is part of the update
-#     if "personal" not in update_data:
-#         update_data["personal"] = {}
-#     update_data["personal"]["email"] = email
-
-#     # Use $set to update only fields in update_data without replacing the whole document
-#     result = await user_collection.update_one(
-#         {"personal.email": email},
-#         {"$set": update_data},
-#         upsert=True
-#     )
-#     return result
+    if any(k.startswith("$") for k in update_data.keys()):
+        result = await user_collection.update_one(
+            {"personal.email": email},
+            update_data,
+            upsert=True
+        )
+    else:
+        result = await user_collection.update_one(
+            {"personal.email": email},
+            {"$set": update_data},
+            upsert=True
+        )
+    return result
 
 
 async def get_user_by_email(email: str):
+    return await user_collection.find_one({"personal.email": email})
+
+
+async def get_clean_user_data(email: str) -> dict:
     """
-    Fetch a user by email.
+    Just fetch merged profile (rawUserInfo + rawResume) without cleaning.
     """
     user = await user_collection.find_one({"personal.email": email})
-    return user
+    if not user:
+        return {}
+
+    merged = {
+        "email": email,
+        "userInfo": user.get("rawUserInfo", {}),
+        "resume": user.get("rawResume", {})
+    }
+
+    return merged

@@ -1,6 +1,6 @@
 # app/routes/user_info.py
 from fastapi import APIRouter, Request, HTTPException
-from app.services.mongo_service import update_user_by_email  # <-- use your service
+from app.services.mongo_service import update_user_by_email
 
 router = APIRouter()
 
@@ -8,24 +8,13 @@ router = APIRouter()
 async def submit_user_info(request: Request):
     try:
         data = await request.json()
-        print("📥 Incoming Data:", data)
-
-        if not data:
-            raise HTTPException(status_code=400, detail="No data received")
-
         email = data.get("personal", {}).get("email")
         if not email:
-            raise HTTPException(status_code=422, detail="Email is required inside 'personal' field")
+            raise HTTPException(status_code=422, detail="Email is required")
 
-        # 🔒 Use encryption-aware update function
-        await update_user_by_email(email, data)
+        # Save raw user info only
+        await update_user_by_email(email, {"rawUserInfo": data})
 
-        print("✅ Data upserted (encrypted) for email:", email)
-        return {
-            "message": "User information stored successfully",
-            "email": email
-        }
-
+        return {"message": "User info stored successfully", "email": email}
     except Exception as e:
-        print("❌ Backend Error:", str(e))
-        raise HTTPException(status_code=500, detail=f"Failed to store user info: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
