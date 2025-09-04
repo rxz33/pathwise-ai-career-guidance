@@ -12,4 +12,3 @@ async def call_llm(provider: str, prompt: str, **kwargs) -> str:
         return await ask_openai(prompt, **kwargs)
     else:
         raise ValueError(f"Unknown LLM provider: {provider}")
-3

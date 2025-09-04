@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-from app.services.groq_service import ask_groq
+from app.llm.groq_service import ask_groq
 from app.services.mongo_service import get_user_by_email 
 from app.services.mongo_service import update_user_by_email 
 from string import Template

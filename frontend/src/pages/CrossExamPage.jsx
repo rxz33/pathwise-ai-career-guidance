@@ -1,139 +1,92 @@
 import React, { useEffect, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 
 function CrossExamPage() {
   const navigate = useNavigate();
-  const location = useLocation();
 
   const [questions, setQuestions] = useState([]);
   const [answers, setAnswers] = useState([]);
   const [loading, setLoading] = useState(false);
-
-  // ✅ Define email only once and use fallback sources
-  const [email, setEmail] = useState(() => {
-    return location.state?.email || localStorage.getItem('user_email') || '';
-  });
+  const [email, setEmail] = useState('');
 
   useEffect(() => {
-    const savedData = localStorage.getItem('crossExamQs');
-    const formData = localStorage.getItem('user_form_data');
+    // Fetch saved data from localStorage
+    const savedQuestions = localStorage.getItem('crossExamQs');
+    const userFormData = localStorage.getItem('user_form_data');
+    const userEmail = localStorage.getItem('userEmail');
 
-    console.log('✅ crossExamQs from localStorage:', savedData);
-    console.log('✅ user_form_data from localStorage:', formData);
-
-    if (!savedData || !formData) {
+    if (!savedQuestions || !userFormData || !userEmail) {
       toast.error('Missing data. Please restart the process.');
       navigate('/');
       return;
     }
 
-    try {
-      const parsedQuestions = JSON.parse(savedData);
-      const parsedForm = JSON.parse(formData);
+    setEmail(userEmail);
 
-      console.log('✅ Parsed questions object:', parsedQuestions);
-      console.log('✅ Parsed user email:', parsedForm?.personal?.email);
-
-      setQuestions(parsedQuestions.questions || []);
-      setAnswers(new Array(parsedQuestions.questions?.length || 0).fill(''));
-
-      // ✅ Update email if not already set
-      if (!email && parsedForm?.personal?.email) {
-        setEmail(parsedForm.personal.email);
-        localStorage.setItem('user_email', parsedForm.personal.email);
-      }
-
-      // Save user name for later use
-      if (!localStorage.getItem('user_name') && parsedForm?.personal?.name) {
-        localStorage.setItem('user_name', parsedForm.personal.name);
-      }
-    } catch (error) {
-      console.error('❌ JSON parsing error:', error);
-      toast.error('Corrupted data. Please restart.');
-      navigate('/');
-    }
-  }, [navigate, email]);
+    const parsedQuestions = JSON.parse(savedQuestions);
+    setQuestions(parsedQuestions || []);
+    setAnswers(new Array(parsedQuestions?.length || 0).fill(''));
+  }, [navigate]);
 
   const handleChange = (index, value) => {
-    const newAnswers = [...answers];
-    newAnswers[index] = value;
-    setAnswers(newAnswers);
-  };
-
-  const generateManualSummary = () => {
-    const form = JSON.parse(localStorage.getItem('user_form_data'));
-    const name = form?.personal?.name || 'The user';
-    const hometown = form?.personal?.hometown || 'an unspecified location';
-    const locationType = form?.personal?.current_location_type || 'unspecified';
-
-    const parseField = (field) => {
-      if (Array.isArray(field)) return field.join(', ');
-      if (typeof field === 'string') return field;
-      return 'not specified';
-    };
-
-    const interests = parseField(form?.interests);
-    const strengths = parseField(form?.strengths);
-    const weaknesses = parseField(form?.weaknesses);
-    const goal = form?.learning?.goal || 'explore career options';
-
-    return `
-${name} is from ${hometown}, currently living in a ${locationType} area.
-Interests: ${interests}.
-Strengths: ${strengths}.
-Weaknesses: ${weaknesses}.
-Goal: ${goal}.
-`.trim();
+    const updatedAnswers = [...answers];
+    updatedAnswers[index] = value;
+    setAnswers(updatedAnswers);
   };
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  if (answers.some((ans) => ans.trim() === '')) {
-    toast.error('Please answer all questions.');
-    return;
-  }
+    if (answers.some(ans => ans.trim() === '')) {
+      toast.error('Please answer all questions.');
+      return;
+    }
 
-  if (!email) {
-    toast.error('Missing email. Please restart the process.');
-    return;
-  }
+    if (!email) {
+      toast.error('Missing email. Please restart.');
+      return;
+    }
 
-  setLoading(true);
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+    setLoading(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 
-  try {
-    const manualSummary = generateManualSummary();
-
-    const res = await fetch('http://localhost:8000/evaluate-cross-exam', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
+    try {
+      // Prepare payload for the backend
+      const payload = {
         email,
-        user_summary: localStorage.getItem('evaluation') || manualSummary,
-      }),
-    });
+        answers,
+      };
 
-    if (!res.ok) throw new Error('Server error');
+      const res = await fetch('http://localhost:8000/submit-answers', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
 
-    const data = await res.json();
-    console.log('✅ Career evaluation response:', data);
-    localStorage.setItem('careerEvaluation', JSON.stringify(data));
+      if (!res.ok) throw new Error('Server error');
 
+      const data = await res.json();
+      console.log('✅ Cross-exam response:', data);
 
-    toast.success('Evaluation complete! 🚀');
-    // localStorage.setItem('careerEvaluationText', evaluation);
-    localStorage.setItem('user_email', email);
-
-    navigate('/career-result');
-  } catch (err) {
-    console.error(err);
-    toast.error('Something went wrong!');
-  } finally {
-    setLoading(false);
-  }
-};
+      // Save evaluation & next questions (if any)
+      localStorage.setItem('careerEvaluation', JSON.stringify(data.evaluation || {}));
+      if (data.followupQuestions?.length > 0) {
+        localStorage.setItem('crossExamQs', JSON.stringify(data.followupQuestions));
+        setQuestions(data.followupQuestions);
+        setAnswers(new Array(data.followupQuestions.length).fill(''));
+        toast.success('Next set of questions loaded!');
+      } else {
+        toast.success('Evaluation complete! 🚀');
+        navigate('/career-result');
+      }
+    } catch (err) {
+      console.error('❌', err);
+      toast.error('Something went wrong!');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="max-w-3xl mx-auto p-6">

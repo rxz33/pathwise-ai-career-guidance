@@ -1,40 +1,68 @@
-import os
-from groq import Groq
-from typing import Dict, Any
+# app/routes/cross_exam.py
+from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel
+from typing import List, Optional
+from app.services.mongo_service import get_user_by_email, update_user_by_email
+from app.services.llm_service import call_llm
 
-client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+router = APIRouter()
 
-class CrossExamAnalyzer:
-    def __init__(self, email: str):
-        self.email = email
+# ---------- Pydantic schema ----------
+class SubmitAnswersPayload(BaseModel):
+    email: str
+    answers: List[str]
 
-    async def run(self, answers: Dict[str, Any]) -> Dict[str, Any]:
-        if not answers:
-            return {"summary": "No answers provided"}
+class CrossExamResponse(BaseModel):
+    evaluation: dict
+    followupQuestions: Optional[List[str]] = []
 
-        # Build prompt
+# ---------- Backend Route ----------
+@router.post("/submit-answers", response_model=CrossExamResponse)
+async def submit_cross_exam(payload: SubmitAnswersPayload):
+    try:
+        email = payload.email
+        answers = payload.answers
+
+        # 1️⃣ Fetch user data
+        user_doc = await get_user_by_email(email)
+        if not user_doc:
+            raise HTTPException(status_code=404, detail="User not found")
+
+        # 2️⃣ Save answers in MongoDB
+        await update_user_by_email(email, {"crossExamAnswers": answers})
+
+        # 3️⃣ Prepare LLM prompt
+        # You can refine this prompt based on your cross-exam design
         prompt = f"""
-        You are an AI career counselor. Analyze the following cross-exam answers:
-        {answers}
+You are a career guidance AI. The user has submitted the following answers to cross-examination questions:
+{answers}
 
-        Return JSON with:
-        - strengths
-        - weaknesses
-        - consistency check (are answers genuine?)
-        - summary
-        """
+User profile data:
+{user_doc}
 
-        response = client.chat.completions.create(
-            model="mixtral-8x7b-32768",  # ⚡ Groq LLM
-            messages=[{"role": "user", "content": prompt}],
-            temperature=0.3
-        )
+Generate:
+1. A detailed evaluation of the user.
+2. If needed, 5-6 follow-up questions to verify or refine their responses.
 
-        content = response.choices[0].message.content.strip()
+Return JSON only in the format:
+{{
+  "evaluation": {{...}},
+  "followupQuestions": ["question1", "question2", ...]
+}}
+"""
 
-        # If model returns text JSON, try parsing
+        # 4️⃣ Call the LLM (choose provider: "gemini" for speed + quality)
+        llm_response = await call_llm(provider="gemini", prompt=prompt)
+
+        # 5️⃣ Parse LLM output
+        import json
         try:
-            import json
-            return json.loads(content)
-        except:
-            return {"summary": content, "raw": answers}
+            result = json.loads(llm_response)
+        except Exception:
+            # fallback: wrap raw text into evaluation
+            result = {"evaluation": {"text": llm_response}, "followupQuestions": []}
+
+        return result
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

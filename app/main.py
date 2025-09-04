@@ -5,14 +5,10 @@ from app.core.config import setup_cors
 from app.database import create_indexes
 from fastapi.middleware.cors import CORSMiddleware
 from app.routes.submit_info import router as submit_info_router
-# from app.routes.cross_exam import router as cross_exam_router
-# from app.routes.career_result import router as career_result_router
-# from app.routes.evaluate_cross_exam import router as evaluate_cross_exam_router
-from app.routes.result import router as result_router
+from app.routes.cross_exam import router as cross_exam_router
+# from app.routes.result import router as result_router
 from app.routes.tests import router as tests_router
 from app.routes.upload_resume import router as upload_resume_router
-# from app.routes.pipeline_routes import router as pipeline_router
-from app.routes.clean_profile import router as clean_router
 
 app = FastAPI(
     title="AI Career Guidance System",
@@ -44,10 +40,7 @@ async def read_root():
 
 # Include routes
 app.include_router(submit_info_router)
-# app.include_router(cross_exam_router)
-# app.include_router(career_result_router)
-# app.include_router(evaluate_cross_exam_router)
-
+app.include_router(cross_exam_router)
 # Custom error handler
 @app.exception_handler(422)
 async def validation_exception_handler(request: Request, exc: HTTPException):
@@ -60,8 +53,6 @@ async def validation_exception_handler(request: Request, exc: HTTPException):
 async def startup():
     await create_indexes()
 
-app.include_router(result_router)
+# app.include_router(result_router)
 app.include_router(tests_router)
 app.include_router(upload_resume_router)
-app.include_router(clean_router)
-# app.include_router(pipeline_router)
