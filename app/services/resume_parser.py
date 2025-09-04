@@ -1,60 +1,68 @@
-# app/services/resume_parser_service.py
-import io
-from PyPDF2 import PdfReader
+# app/services/resume_parser.py
+import fitz  # PyMuPDF for PDFs
 import docx
 import re
+from typing import Dict, Any
 
-# Keywords for basic parsing
-SKILLS_KEYWORDS = {"python", "java", "react", "sql", "javascript", "c++", "node", "django", "flask"}
-CERT_KEYWORDS = {"certified", "certificate", "course", "diploma", "license"}
-PROJECT_KEYWORDS = {"project", "assignment", "research", "thesis"}
-EDU_KEYWORDS = {"bachelor", "master", "mba", "degree", "university", "college"}
 
-def parse_resume(file_content: bytes, content_type: str) -> dict:
+def parse_resume(file_content: bytes, content_type: str) -> Dict[str, Any]:
     text = ""
 
-    # ✅ Extract text
+    # ------------------ Extract text ------------------
     if content_type == "application/pdf":
-        reader = PdfReader(io.BytesIO(file_content))
-        text = " ".join([page.extract_text() or "" for page in reader.pages])
-    elif content_type in ["application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                          "application/msword"]:
-        doc = docx.Document(io.BytesIO(file_content))
-        text = " ".join([para.text for para in doc.paragraphs])
+        pdf_doc = fitz.open(stream=file_content, filetype="pdf")
+        for page in pdf_doc:
+            text += page.get_text()
+
+    elif content_type in [
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "application/msword",
+    ]:
+        doc = docx.Document(file_content)
+        for para in doc.paragraphs:
+            text += para.text + "\n"
+
     else:
-        text = file_content.decode("utf-8", errors="ignore")
+        raise ValueError(f"Unsupported file type: {content_type}")
 
-    text_lower = text.lower()
+    text = text.strip()
 
-    # ✅ Extract Skills
-    skills = [word for word in SKILLS_KEYWORDS if word in text_lower]
+    # ------------------ Skills extraction (very basic) ------------------
+    predefined_skills = [
+        "Python", "Java", "C++", "SQL", "HTML", "CSS", "JavaScript", "React",
+        "Node.js", "Django", "Flask", "Machine Learning", "Deep Learning",
+        "Data Analysis", "AWS", "Docker", "Kubernetes"
+    ]
+    skills = [s for s in predefined_skills if re.search(rf"\b{s}\b", text, re.IGNORECASE)]
 
-    # ✅ Extract Certifications
-    certifications = []
-    for line in text.splitlines():
-        if any(cert in line.lower() for cert in CERT_KEYWORDS):
-            certifications.append(line.strip())
-
-    # ✅ Extract Projects
+    # ------------------ Projects extraction ------------------
     projects = []
-    for line in text.splitlines():
-        if any(proj in line.lower() for proj in PROJECT_KEYWORDS):
-            projects.append(line.strip())
+    if "project" in text.lower():
+        project_lines = [
+            line.strip()
+            for line in text.split("\n")
+            if re.search(r"(project|developed|built)", line, re.IGNORECASE)
+        ]
+        projects.extend(project_lines[:5])  # limit to 5
 
-    # ✅ Extract Education
-    education = []
-    for line in text.splitlines():
-        if any(edu in line.lower() for edu in EDU_KEYWORDS):
-            education.append(line.strip())
+    # ------------------ Certifications extraction ------------------
+    certifications = []
+    if "certification" in text.lower() or "certificate" in text.lower():
+        cert_lines = [
+            line.strip()
+            for line in text.split("\n")
+            if re.search(r"(certification|certificate)", line, re.IGNORECASE)
+        ]
+        certifications.extend(cert_lines[:5])  # limit to 5
 
-    # ✅ Extract Experience Summary (simple heuristic)
-    experience = "Yes" if "experience" in text_lower or "worked at" in text_lower else "No"
+    # ------------------ Work experience check ------------------
+    has_experience = "Yes" if "experience" in text.lower() else "No"
 
+    # ------------------ Final result matching ResumeData ------------------
     return {
-        "extracted_text": text[:5000],  # store more text for Agentic AI
+        "extractedText": text,
         "skills": skills,
-        "has_experience": experience,
-        "certifications": certifications,
         "projects": projects,
-        "education": education
+        "certifications": certifications,
+        "hasExperience": has_experience,
     }

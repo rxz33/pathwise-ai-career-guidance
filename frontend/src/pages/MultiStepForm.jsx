@@ -98,7 +98,9 @@ const onSubmit = async () => {
       await fetch("http://localhost:8000/upload-resume", {
         method: "POST",
         body: formDataUpload,
-      });
+      })
+      .then(res => res.json())
+      .then(data => console.log(data));
     }
 
     // 2️⃣ Submit other form info

@@ -3,13 +3,15 @@ from fastapi.responses import JSONResponse
 from app.utils.logger import logger
 from app.core.config import setup_cors
 from app.database import create_indexes
+from fastapi.middleware.cors import CORSMiddleware
 from app.routes.submit_info import router as submit_info_router
-from app.routes.cross_exam import router as cross_exam_router
-from app.routes.career_result import router as career_result_router
-from app.routes.evaluate_cross_exam import router as evaluate_cross_exam_router
+# from app.routes.cross_exam import router as cross_exam_router
+# from app.routes.career_result import router as career_result_router
+# from app.routes.evaluate_cross_exam import router as evaluate_cross_exam_router
 from app.routes.result import router as result_router
 from app.routes.tests import router as tests_router
-from app.routes.pipeline_routes import router as pipeline_router
+from app.routes.upload_resume import router as upload_resume_router
+# from app.routes.pipeline_routes import router as pipeline_router
 app = FastAPI(
     title="AI Career Guidance System",
     version="1.0.0",
@@ -20,6 +22,19 @@ app = FastAPI(
 # CORS setup
 setup_cors(app)
 
+# Allow your frontend origin
+origins = [
+    "http://localhost:5173",  # frontend dev server
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,  # allow your frontend
+    allow_credentials=True,
+    allow_methods=["*"],  # GET, POST, etc.
+    allow_headers=["*"],  # allow headers like Content-Type
+)
+
 # Default route
 @app.get("/")
 async def read_root():
@@ -27,9 +42,9 @@ async def read_root():
 
 # Include routes
 app.include_router(submit_info_router)
-app.include_router(cross_exam_router)
-app.include_router(career_result_router)
-app.include_router(evaluate_cross_exam_router)
+# app.include_router(cross_exam_router)
+# app.include_router(career_result_router)
+# app.include_router(evaluate_cross_exam_router)
 
 # Custom error handler
 @app.exception_handler(422)
@@ -45,4 +60,5 @@ async def startup():
 
 app.include_router(result_router)
 app.include_router(tests_router)
-app.include_router(pipeline_router)
+app.include_router(upload_resume_router)
+# app.include_router(pipeline_router)
