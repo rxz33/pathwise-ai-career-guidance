@@ -9,6 +9,7 @@ from app.routes.cross_exam import router as cross_exam_router
 from app.routes.career_result import router as career_result_router
 from app.routes.tests import router as tests_router
 from app.routes.upload_resume import router as upload_resume_router
+from app.routes.final_analysis import router as final_analysis_router
 
 app = FastAPI(
     title="AI Career Guidance System",
@@ -56,3 +57,4 @@ async def startup():
 app.include_router(career_result_router)
 app.include_router(tests_router)
 app.include_router(upload_resume_router)
+app.include_router(final_analysis_router)

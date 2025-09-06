@@ -98,11 +98,6 @@ const downloadPDF = () => {
     cursorY += lineHeight; // extra spacing after section
   };
 
-  // Extract data from localStorage
-  const userData = JSON.parse(localStorage.getItem("user_form_data")) || {};
-  const bigFive = userData.tests?.bigFive || {};
-  const riasec = userData.tests?.riasec || {};
-  const aptitude = userData.tests?.aptitude || {};
   const finalAnalysis = userData.finalAnalysis || "No final analysis available.";
 
   // Add each section

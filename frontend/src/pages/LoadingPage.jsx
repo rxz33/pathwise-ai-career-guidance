@@ -6,35 +6,35 @@ const LoadingPage = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const email = localStorage.getItem("userEmail"); // ✅ Fetch from localStorage
-    const userFormData = localStorage.getItem("user_form_data");
+    const email = localStorage.getItem("user_email");
 
-    if (!email || !userFormData) {
-      toast.error("Missing user data. Please restart the process.");
+    if (!email) {
+      toast.error("Email not found. Please start again.");
       navigate("/");
       return;
     }
 
-    const initialAnswers = []; // Can prefill or keep empty initially
-
     const fetchCrossExam = async () => {
       try {
-        const res = await fetch("http://localhost:8000/submit-answers", {
+        const res = await fetch("http://localhost:8000/generate-questions", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, answers: initialAnswers }),
+          body: JSON.stringify({ email }), // ✅ matches backend Pydantic model
         });
 
         if (!res.ok) throw new Error("Error generating cross exam");
 
         const data = await res.json();
-        console.log("✅ Received cross-exam data:", data);
 
-        localStorage.setItem("crossExamQs", JSON.stringify(data.followupQuestions));
+        // Clear old questions before saving
+        localStorage.removeItem("crossExamQs");
+        localStorage.setItem("crossExamQs", JSON.stringify(data.questions));
+
         navigate("/cross-exam");
-      } catch (error) {
-        console.error("❌ Error loading cross-exam:", error);
-        toast.error("Failed to generate cross-exam questions.");
+      } catch (err) {
+        console.error(err);
+        toast.error("Failed to load questions. Try again.");
+        navigate("/");
       }
     };
 
