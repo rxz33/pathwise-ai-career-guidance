@@ -1,15 +1,32 @@
 from app.services.llm_service import call_llm
-from app.config import AGENT_LLM_MAPPING
+import json
 
-class GapAnalyzer:
-    def __init__(self, email: str, provider: str = None):
-        self.email = email
-        self.provider = provider or AGENT_LLM_MAPPING["gap_analysis"]
+class GapAnalyzerAgent:
+    """
+    Detect gaps between user's current profile and target careers.
+    """
+    def __init__(self, llm_provider="gemini"):
+        self.llm_provider = llm_provider
 
-    async def run(self, results: dict) -> str:
+    async def detect_gaps(self, user_data: dict, agent_output: dict) -> dict:
         prompt = f"""
-        Based on cross-exam and resume analysis:
-        {results},
-        identify the most critical career gaps, missing skills, and growth areas.
+        You are an expert career counselor AI.
+        Analyze the user's profile and the suggested career paths.
+        Identify missing skills, experience, or education gaps that prevent success.
+
+        User profile: {user_data}
+        Suggested career/aptitude output: {agent_output}
+
+        Return a JSON with:
+        {{
+          "missing_skills": [list of missing skills],
+          "experience_gaps": [list of missing experience],
+          "education_gaps": [list of missing education/training]
+        }}
         """
-        return await call_llm(provider=self.provider, prompt=prompt)
+        response = await call_llm(self.llm_provider, prompt)
+        try:
+            gaps = json.loads(response)
+        except json.JSONDecodeError:
+            gaps = json.loads(response.strip("` \n"))
+        return gaps

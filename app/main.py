@@ -1,9 +1,9 @@
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
 from app.utils.logger import logger
 from app.core.config import setup_cors
 from app.database import create_indexes
-from fastapi.middleware.cors import CORSMiddleware
 from app.routes.submit_info import router as submit_info_router
 from app.routes.cross_exam import router as cross_exam_router
 from app.routes.career_result import router as career_result_router
@@ -18,20 +18,18 @@ app = FastAPI(
     debug=True
 )
 
-# CORS setup
-setup_cors(app)
-
-# Allow your frontend origin
+# Allow frontend origins
 origins = [
-    "http://localhost:5173",  # frontend dev server
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
 ]
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,  # allow your frontend
     allow_credentials=True,
-    allow_methods=["*"],  # GET, POST, etc.
-    allow_headers=["*"],  # allow headers like Content-Type
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # Default route
@@ -42,6 +40,11 @@ async def read_root():
 # Include routes
 app.include_router(submit_info_router)
 app.include_router(cross_exam_router)
+app.include_router(career_result_router)
+app.include_router(tests_router)
+app.include_router(upload_resume_router)
+app.include_router(final_analysis_router)
+
 # Custom error handler
 @app.exception_handler(422)
 async def validation_exception_handler(request: Request, exc: HTTPException):
@@ -50,11 +53,7 @@ async def validation_exception_handler(request: Request, exc: HTTPException):
         status_code=422,
         content={"message": "Validation failed", "details": exc.detail},
     )
+
 @app.on_event("startup")
 async def startup():
     await create_indexes()
-
-app.include_router(career_result_router)
-app.include_router(tests_router)
-app.include_router(upload_resume_router)
-app.include_router(final_analysis_router)

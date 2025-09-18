@@ -1,21 +1,84 @@
 # app/routes/cross_exam.py
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Any
 from app.services import mongo_service
 from app.agents.cross_exam_agent import CrossExamAgent
+import json
+import re
 
 router = APIRouter()
-agent = CrossExamAgent(llm_provider="gemini")
+agent = CrossExamAgent(llm_provider="gemini", max_followup_rounds=2)
 
 
 class SubmitAnswersRequest(BaseModel):
     email: str
     answers: List[str]
+    round_number: Optional[int] = 1  # track which round of follow-ups
+
+
+def safe_json_parse(text: str) -> Dict[str, Any]:
+    """
+    Safely extract and parse JSON from LLM output.
+    If parsing fails, return fallback structure.
+    """
+    if not text or not text.strip():
+        return {
+            "accuracy": 0.0,
+            "strengths": [],
+            "weaknesses": [],
+            "gaps": [],
+            "summary": "Empty response from AI"
+        }
+
+    try:
+        return json.loads(text)
+    except json.JSONDecodeError:
+        # Try extracting JSON inside text
+        match = re.search(r"\{.*\}", text, re.DOTALL)
+        if match:
+            try:
+                return json.loads(match.group())
+            except json.JSONDecodeError:
+                pass
+
+        # If parsing fails, return fallback
+        return {
+            "accuracy": 0.0,
+            "strengths": [],
+            "weaknesses": [],
+            "gaps": [],
+            "summary": f"Invalid JSON received: {text[:200]}"
+        }
+
+
+def safe_list_parse(text: str) -> List[str]:
+    """
+    Ensure response is parsed into a JSON list of strings.
+    """
+    if not text or not text.strip():
+        return []
+
+    try:
+        data = json.loads(text)
+        if isinstance(data, list):
+            return [str(q) for q in data]
+    except json.JSONDecodeError:
+        # Try extracting list
+        match = re.search(r"\[.*\]", text, re.DOTALL)
+        if match:
+            try:
+                data = json.loads(match.group())
+                if isinstance(data, list):
+                    return [str(q) for q in data]
+            except json.JSONDecodeError:
+                pass
+
+    return []
 
 
 @router.post("/generate-questions")
-async def generate_questions(payload: Dict):
+async def generate_questions(payload: Dict[str, Any]):
     """
     Generate 5–6 personalized cross-exam questions for a user.
     """
@@ -27,8 +90,9 @@ async def generate_questions(payload: Dict):
     if not user_data:
         raise HTTPException(status_code=404, detail="User not found")
 
-    # Generate questions with agent
-    questions = await agent.generate_questions(user_data)
+    # Generate questions using the agent
+    raw_questions = await agent.generate_questions(user_data)
+    questions = safe_list_parse(raw_questions)
 
     # Save generated questions in DB
     await mongo_service.save_cross_exam_questions(email, questions)
@@ -39,27 +103,32 @@ async def generate_questions(payload: Dict):
 @router.post("/submit-answers")
 async def submit_answers(req: SubmitAnswersRequest):
     """
-    Receive answers, analyze them, and return either follow-ups or final analysis.
+    Receive answers, analyze them, and return follow-ups or final analysis.
     """
     email = req.email
     answers = req.answers
+    round_number = req.round_number or 1
 
     user_data = await mongo_service.get_user_by_email(email)
     if not user_data:
         raise HTTPException(status_code=404, detail="User not found")
 
-    # Save answers in DB
+    # Save user answers
     await mongo_service.save_cross_exam_answers(email, answers)
 
-    # Generate analysis from LLM
-    analysis = await agent.analyze_answers(user_data, answers)
+    # Analyze answers (safe JSON parsing)
+    raw_analysis = await agent.analyze_answers(user_data, answers)
+    analysis = safe_json_parse(raw_analysis)
     await mongo_service.save_cross_exam_analysis(email, analysis)
 
-    # Optionally generate follow-ups
-    followup_questions: Optional[List[str]] = []
-    if len(answers) < 6:  # Example condition
-        followup_questions = await agent.generate_questions(user_data)
-        await mongo_service.save_cross_exam_followups(email, followup_questions)
+    # Generate follow-up questions if needed
+    followup_questions: List[str] = []
+    if round_number <= agent.max_followup_rounds:
+        raw_followups = await agent.generate_followups(user_data, answers, round_number)
+        followup_questions = safe_list_parse(raw_followups)
+
+        if followup_questions:
+            await mongo_service.save_cross_exam_followups(email, followup_questions)
 
     return {
         "analysis": analysis,
