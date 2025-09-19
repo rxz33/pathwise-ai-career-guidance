@@ -75,10 +75,10 @@ const MultiStepForm = ({ flatStyle = false }) => {
         const formDataUpload = new FormData();
         formDataUpload.append("email", email);
         formDataUpload.append("resume", formData.resumeFile[0]);
-        await fetch("http://localhost:8000/upload-resume", { method: "POST", body: formDataUpload });
+        await fetch("http://127.0.0.1:8000/upload-resume", { method: "POST", body: formDataUpload });
       }
 
-      const response = await fetch("http://localhost:8000/submit-info", {
+      const response = await fetch("http://127.0.0.1:8000/submit-info", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),

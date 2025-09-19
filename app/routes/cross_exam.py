@@ -52,29 +52,43 @@ def safe_json_parse(text: str) -> Dict[str, Any]:
         }
 
 
-def safe_list_parse(text: str) -> List[str]:
+def safe_list_parse(obj) -> List[str]:
     """
-    Ensure response is parsed into a JSON list of strings.
+    Ensure response is parsed into a list of strings.
+    Handles both string (JSON) and list inputs.
     """
-    if not text or not text.strip():
+    if not obj:
         return []
 
-    try:
-        data = json.loads(text)
-        if isinstance(data, list):
-            return [str(q) for q in data]
-    except json.JSONDecodeError:
-        # Try extracting list
-        match = re.search(r"\[.*\]", text, re.DOTALL)
-        if match:
-            try:
-                data = json.loads(match.group())
-                if isinstance(data, list):
-                    return [str(q) for q in data]
-            except json.JSONDecodeError:
-                pass
+    # If already a list
+    if isinstance(obj, list):
+        return [str(item).strip() for item in obj if str(item).strip()]
 
-    return []
+    # If string, try parsing JSON
+    if isinstance(obj, str):
+        if not obj.strip():
+            return []
+        try:
+            data = json.loads(obj)
+            if isinstance(data, list):
+                return [str(item).strip() for item in data if str(item).strip()]
+        except json.JSONDecodeError:
+            # Try extracting list from text
+            import re
+            match = re.search(r"\[.*\]", obj, re.DOTALL)
+            if match:
+                try:
+                    data = json.loads(match.group())
+                    if isinstance(data, list):
+                        return [str(item).strip() for item in data if str(item).strip()]
+                except json.JSONDecodeError:
+                    pass
+        # If still fails, return empty
+        return []
+
+    # Fallback: convert to string
+    return [str(obj).strip()] if str(obj).strip() else []
+
 
 
 @router.post("/generate-questions")

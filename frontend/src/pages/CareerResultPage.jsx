@@ -12,11 +12,12 @@ const stages = [
   "Compiling final summary..."
 ];
 
-function CareerResultPage() {
+export default function CareerResultPage() {
   const location = useLocation();
   const navigate = useNavigate();
   const [result, setResult] = useState(null);
   const [loadingStage, setLoadingStage] = useState(0);
+  const [loading, setLoading] = useState(false);
   const email = location.state?.email || localStorage.getItem("user_email");
 
   useEffect(() => {
@@ -28,25 +29,47 @@ function CareerResultPage() {
 
     const fetchFinalResult = async () => {
       try {
+        setLoading(true);
+
         // Step-wise simulated loading
         for (let i = 0; i < stages.length; i++) {
           setLoadingStage(i);
-          await new Promise((r) => setTimeout(r, 800));
+          await new Promise((r) => setTimeout(r, 3000));
         }
 
-        const response = await axios.get("http://localhost:8000/get-final-analysis", {
-          params: { email },
-        });
+        const response = await axios.post("http://localhost:8000/finalize-career-path", { email });
+        if (response.data.final_report) {
+          const rawResult = response.data.final_report;
 
-        if (response.data.finalAnalysis) {
-          setResult(response.data.finalAnalysis);
+          // Normalize backend data
+          const normalizedResult = { ...rawResult };
+          ["strengths", "weaknesses", "skill_gaps", "suggestions", "next_steps"].forEach((key) => {
+            if (!Array.isArray(normalizedResult[key])) {
+              if (typeof normalizedResult[key] === "object" && normalizedResult[key] !== null) {
+                normalizedResult[key] = Object.values(normalizedResult[key]).map(String);
+              } else if (normalizedResult[key] !== undefined && normalizedResult[key] !== null) {
+                normalizedResult[key] = [String(normalizedResult[key])];
+              } else {
+                normalizedResult[key] = [];
+              }
+            }
+          });
+
+          // Ensure friendly_summary is always string
+          normalizedResult.friendly_summary = normalizedResult.friendly_summary
+            ? String(normalizedResult.friendly_summary)
+            : "";
+
+          setResult(normalizedResult);
         } else {
-          throw new Error("No finalAnalysis in response.");
+          throw new Error("No final report in response.");
         }
       } catch (err) {
         console.error(err);
         toast.error("Failed to load your final result.");
         navigate("/");
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -55,6 +78,7 @@ function CareerResultPage() {
 
   const downloadPDF = () => {
     if (!result) return;
+
     const doc = new jsPDF({ orientation: "portrait", unit: "pt", format: "a4" });
     const margin = 40;
     const pageWidth = doc.internal.pageSize.getWidth();
@@ -63,6 +87,7 @@ function CareerResultPage() {
     doc.text("Career Guidance Report", margin, 50);
 
     let y = 80;
+
     const addSection = (title, content) => {
       doc.setFontSize(14);
       doc.text(title, margin, y);
@@ -71,14 +96,14 @@ function CareerResultPage() {
 
       if (Array.isArray(content)) {
         content.forEach((item) => {
-          const lines = doc.splitTextToSize("• " + item, pageWidth - margin * 2);
+          const lines = doc.splitTextToSize("• " + String(item), pageWidth - margin * 2);
           lines.forEach((line) => {
             doc.text(line, margin + 20, y);
             y += 16;
           });
         });
       } else if (content) {
-        const lines = doc.splitTextToSize(content, pageWidth - margin * 2);
+        const lines = doc.splitTextToSize(String(content), pageWidth - margin * 2);
         lines.forEach((line) => {
           doc.text(line, margin, y);
           y += 16;
@@ -100,11 +125,16 @@ function CareerResultPage() {
 
   return (
     <div className="min-h-screen flex flex-col justify-center items-center p-6">
-      {result ? (
+      {loading && !result ? (
+        <div className="flex flex-col items-center">
+          <div className="loader mb-4"></div>
+          <p className="text-lg font-medium text-gray-700">{stages[loadingStage]}</p>
+        </div>
+      ) : result ? (
         <div className="max-w-4xl bg-white shadow-lg rounded-lg p-6 space-y-6">
           <h1 className="text-3xl font-bold text-center">🎓 Your Career Guidance Summary</h1>
 
-          {/* Summary */}
+          {/* Friendly Summary */}
           <section>
             <h2 className="text-xl font-semibold">Friendly Summary</h2>
             <p className="text-gray-800">{result.friendly_summary}</p>
@@ -115,9 +145,9 @@ function CareerResultPage() {
             <section key={key}>
               <h2 className="text-xl font-semibold capitalize">{key.replace("_", " ")}</h2>
               <ul className="list-disc pl-6 text-gray-800">
-                {result[key]?.map((item, i) => (
-                  <li key={i}>{item}</li>
-                ))}
+                {Array.isArray(result[key]) && result[key].length > 0
+                  ? result[key].map((item, i) => <li key={i}>{String(item)}</li>)
+                  : <li className="text-gray-500">No data available</li>}
               </ul>
             </section>
           ))}
@@ -139,12 +169,14 @@ function CareerResultPage() {
         </div>
       ) : (
         <div className="flex flex-col items-center">
-          <div className="loader mb-4"></div>
-          <p className="text-lg font-medium text-gray-700">{stages[loadingStage]}</p>
+          <button
+            onClick={() => setLoading(true)}
+            className="bg-green-600 text-white py-2 px-6 rounded-lg"
+          >
+            Generate Career Report
+          </button>
         </div>
       )}
     </div>
   );
 }
-
-export default CareerResultPage;
