@@ -1,7 +1,7 @@
 import os
 from dotenv import load_dotenv
 from groq import Groq
-import asyncio
+import asyncio, httpx
 import logging
 
 logger = logging.getLogger("groq_service")
@@ -12,8 +12,8 @@ GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 if not GROQ_API_KEY:
     raise EnvironmentError("GROQ_API_KEY not found in .env file.")
 
-client = Groq(api_key=GROQ_API_KEY)
-MODEL_NAME = "llama3-70b-8192"
+client = Groq(api_key=GROQ_API_KEY, http_client=httpx.Client(timeout=httpx.Timeout(60.0, connect=30.0)))
+MODEL_NAME = "llama-3.3-70b-versatile"
 
 async def ask_groq(prompt: str, temperature: float = 0.7, max_tokens: int = 1024) -> str:
     try:
