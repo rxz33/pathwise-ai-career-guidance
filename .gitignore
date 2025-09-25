@@ -1,9 +1,0 @@
-# Node
-node_modules/
-
-# Python
-venv/
-__pycache__/
-
-# Environment files
-.env
