@@ -1,12 +1,25 @@
+# Python caches
 __pycache__/
 *.py[cod]
+*.pyc
+
+# Databases
 *.db
 *.sqlite3
+
+# Logs
 *.log
+
+# Environment variables
 .env
 .env.*
-venv/
-.DS_Store
-node_modules/
 **/.env
-*.pyc
+
+# Virtual environments
+venv/
+
+# macOS system files
+.DS_Store
+
+# Node modules (frontend)
+node_modules/
