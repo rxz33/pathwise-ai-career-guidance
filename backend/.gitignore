@@ -18,8 +18,5 @@ __pycache__/
 # Virtual environments
 venv/
 
-# macOS system files
-.DS_Store
-
 # Node modules (frontend)
 node_modules/
