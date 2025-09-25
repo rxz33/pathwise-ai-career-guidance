@@ -1,8 +1,0 @@
-fastapi
-uvicorn
-python-dotenv
-motor
-requests
-openai
-groq
-google-generativeai
