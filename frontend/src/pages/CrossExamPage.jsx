@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
+import { fetchFromAPI } from "../api";
 
 const CrossExamPage = ({ email: propEmail }) => {
   const navigate = useNavigate();
@@ -25,13 +26,13 @@ const CrossExamPage = ({ email: propEmail }) => {
       setLoading(true);
       setError("");
       try {
-        const res = await axios.post(
-          "http://localhost:8000/generate-questions",
-          { email },
-          { headers: { "Content-Type": "application/json" } }
-        );
+        const data = await fetchFromAPI("/generate-questions", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email }),
+        });
 
-        if (res.data?.questions?.length > 0) {
+        if (data?.questions?.length > 0) {
           setQuestions(res.data.questions);
           setAnswers(Array(res.data.questions.length).fill(""));
         } else {
@@ -62,11 +63,11 @@ const CrossExamPage = ({ email: propEmail }) => {
 
     try {
       setLoading(true);
-      await axios.post(
-        "http://localhost:8000/submit-answers",
-        { email, answers },
-        { headers: { "Content-Type": "application/json" } }
-      );
+      await fetchFromAPI("/submit-answers", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, answers }),
+      });
 
       toast.success("Answers submitted successfully!");
       navigate("/career-result", { state: { email } }); // navigate to results
@@ -134,4 +135,4 @@ const CrossExamPage = ({ email: propEmail }) => {
   );
 };
 
-export default CrossExamPage;
+export default CrossExamPage; 

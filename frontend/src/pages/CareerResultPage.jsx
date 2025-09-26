@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
 import axios from "axios";
 import jsPDF from "jspdf";
+import { fetchFromAPI } from "../api"; 
 
 const stages = [
   "Analyzing your answers...",
@@ -31,10 +32,11 @@ export default function CareerResultPage() {
     const startFinalization = async () => {
       try {
         setLoading(true);
-        const response = await axios.post(
-          "http://localhost:8000/finalize-career-path",
-          { email }
-        );
+        const response = await fetchFromAPI("/finalize-career-path", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email })
+        });
         setTaskId(response.data.task_id);
       } catch (err) {
         console.error(err);
@@ -52,11 +54,7 @@ export default function CareerResultPage() {
 
     const interval = setInterval(async () => {
       try {
-        const res = await axios.get(
-          `http://localhost:8000/finalize-career-path/status/${taskId}`
-        );
-        const data = res.data;
-
+        const data = await fetchFromAPI(`/finalize-career-path/status/${taskId}`);
         setLoadingStage(data.current_stage || 0);
         if (data.partial_report) {
           setResult(data.partial_report.final_report || data.partial_report);
