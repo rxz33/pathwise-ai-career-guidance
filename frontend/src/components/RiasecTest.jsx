@@ -93,7 +93,7 @@ const RiasecTest = ({ onComplete, onSkip }) => {
     const payload = { email, test: "riasec", scores };
 
     try {
-      const res = await fetch("http://localhost:8000/riasec", {
+      const res = await fetch("https://pathwise-ai-career-guidance-pgtg.onrender.com", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),

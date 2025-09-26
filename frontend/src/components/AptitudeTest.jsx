@@ -137,7 +137,7 @@ const AptitudeTest = ({ email: propEmail, onComplete, onSkip }) => {
     console.log("Payload sending:", payload);
 
     try {
-      const res = await fetch("http://localhost:8000/apti", {
+      const res = await fetch("https://pathwise-ai-career-guidance-pgtg.onrender.com/apti", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),

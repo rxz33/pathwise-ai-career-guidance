@@ -93,7 +93,7 @@ const BigFiveTest = ({ onComplete, onSkip }) => {
   };
 
   try {
-    const res = await fetch("http://localhost:8000/big-five", {
+    const res = await fetch("https://pathwise-ai-career-guidance-pgtg.onrender.com", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload)
