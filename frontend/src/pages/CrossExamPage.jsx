@@ -33,8 +33,8 @@ const CrossExamPage = ({ email: propEmail }) => {
         });
 
         if (data?.questions?.length > 0) {
-          setQuestions(res.data.questions);
-          setAnswers(Array(res.data.questions.length).fill(""));
+          setQuestions(data.questions);
+          setAnswers(Array(data.questions.length).fill(""));
         } else {
           setError("No questions available at this time.");
         }
