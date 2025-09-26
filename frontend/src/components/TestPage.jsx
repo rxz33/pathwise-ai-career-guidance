@@ -94,7 +94,7 @@ const BigFiveTest = ({ onComplete, onSkip }) => {
   };
 
   try {
-    const res = await fetch(`${API_BASE_URL}/big-five`, {  // <- use correct endpoint
+    const res = await fetchFromAPI(`${API_BASE_URL}/big-five`, {  // <- use correct endpoint
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload)
