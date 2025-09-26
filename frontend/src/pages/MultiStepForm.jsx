@@ -19,6 +19,8 @@ import { StrengthWs } from "../schemas/StrengthWs";
 import { LearningRoadmaps } from "../schemas/LearningRoadmaps";
 import { Optionals } from "../schemas/Optionals";
 
+import { fetchFromAPI } from "../api";
+
 const MultiStepForm = ({ flatStyle = false }) => {
   const navigate = useNavigate();
   const methods = useForm({ resolver: zodResolver(PersonalInfos), mode: "onTouched" });
@@ -62,45 +64,55 @@ const MultiStepForm = ({ flatStyle = false }) => {
   }, [methods]);
 
   const onSubmit = async () => {
-    const email = localStorage.getItem("userEmail");
-    if (!email) return toast.error("Email missing. Please log in again.");
+  const email = localStorage.getItem("userEmail");
+  if (!email) return toast.error("Email missing. Please log in again.");
 
-    const rawData = methods.getValues();
-    const formData = { ...rawData, personal: { ...rawData.personal, email } };
+  const rawData = methods.getValues();
+  const formData = { ...rawData, personal: { ...rawData.personal, email } };
 
-    try {
-      setIsSubmitting(true);
+  try {
+    setIsSubmitting(true);
 
-      if (formData.hasResume === "Yes" && formData.resumeFile?.length > 0) {
-        const formDataUpload = new FormData();
-        formDataUpload.append("email", email);
-        formDataUpload.append("resume", formData.resumeFile[0]);
-        await fetch("http://127.0.0.1:8000/upload-resume", { method: "POST", body: formDataUpload });
-      }
+    // Upload resume if available
+    if (formData.hasResume === "Yes" && formData.resumeFile?.length > 0) {
+      const formDataUpload = new FormData();
+      formDataUpload.append("email", email);
+      formDataUpload.append("resume", formData.resumeFile[0]);
 
-      const response = await fetch("http://127.0.0.1:8000/submit-info", {
+      // For FormData, call fetch directly without 'Content-Type' header
+      const uploadRes = await fetch(`${import.meta.env.VITE_API_URL}/upload-resume`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: formDataUpload,
       });
 
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.detail);
-
-      localStorage.setItem("user_form_data", JSON.stringify(formData));
-      setIsSuccess(true);
-      toast.success("Form submitted successfully!");
-
-      // Navigate to loading page for cross-exam
-      setTimeout(() => navigate("/loading"), 1000);
-
-    } catch (error) {
-      console.error(error);
-      toast.error("Submission failed. Please try again.");
-    } finally {
-      setIsSubmitting(false);
+      if (!uploadRes.ok) {
+        const errData = await uploadRes.json();
+        throw new Error(errData.detail || "Resume upload failed");
+      }
     }
-  };
+
+    // Submit form JSON data
+    await fetchFromAPI("/submit-info", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(formData),
+    });
+
+    localStorage.setItem("user_form_data", JSON.stringify(formData));
+    setIsSuccess(true);
+    toast.success("Form submitted successfully!");
+
+    // Navigate to loading page for cross-exam
+    setTimeout(() => navigate("/loading"), 1000);
+
+  } catch (error) {
+    console.error(error);
+    toast.error(error.message || "Submission failed. Please try again.");
+  } finally {
+    setIsSubmitting(false);
+  }
+};
+
 
   const handleNext = async () => {
     const valid = await methods.trigger();
