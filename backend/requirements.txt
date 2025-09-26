@@ -4,7 +4,8 @@ motor==3.7.1
 pymongo==4.14.1
 python-dotenv==1.1.0
 email-validator==2.3.0
-# PyMuPDF==1.26.10
+# PyMuPDF==1.26.9
+pdfplumber==0.11.4  
 google-ai-generativelanguage==0.6.15
 google-generativeai==0.8.4
 openai==1.98.0
@@ -13,3 +14,4 @@ python-multipart==0.0.20
 requests==2.32.3
 pydantic==2.11.3
 typing-extensions==4.12.2
+python-docx==1.1.2
