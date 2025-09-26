@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { toast } from "react-hot-toast";
+import { fetchFromAPI } from "../api";
 
 const questions = [
   { trait: "extraversion", text: "I am the life of the party." },
@@ -93,7 +94,7 @@ const BigFiveTest = ({ onComplete, onSkip }) => {
   };
 
   try {
-    const res = await fetch("https://pathwise-ai-career-guidance-pgtg.onrender.com", {
+    const res = await fetch(`${API_BASE_URL}/big-five`, {  // <- use correct endpoint
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload)
@@ -107,7 +108,6 @@ const BigFiveTest = ({ onComplete, onSkip }) => {
     toast.error("Failed to send test result.");
   }
 };
-
 
   const calculateResult = (allAnswers) => {
     const scores = {};

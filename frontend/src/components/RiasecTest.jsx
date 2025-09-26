@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { toast } from "react-hot-toast";
+import { fetchFromAPI } from "../api";
 
 const questions = [
   { type: "Realistic", text: "I enjoy working with tools, machines, or computers." },
@@ -93,13 +94,11 @@ const RiasecTest = ({ onComplete, onSkip }) => {
     const payload = { email, test: "riasec", scores };
 
     try {
-      const res = await fetch("https://pathwise-ai-career-guidance-pgtg.onrender.com", {
+      const data = await fetchFromAPI("/riasec", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.detail || "Submission failed");
       toast.success("RIASEC test result sent!");
     } catch (err) {
       console.error(err);

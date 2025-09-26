@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { toast } from "react-hot-toast";
+import { fetchFromAPI } from "../api";
 
 const questions = [
   {
@@ -137,19 +138,17 @@ const AptitudeTest = ({ email: propEmail, onComplete, onSkip }) => {
     console.log("Payload sending:", payload);
 
     try {
-      const res = await fetch("https://pathwise-ai-career-guidance-pgtg.onrender.com/apti", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
+  const data = await fetchFromAPI("/apti", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  toast.success("Aptitude Test results saved!");
+} catch (err) {
+  console.error(err);
+  toast.error("Error saving Aptitude results");
+}
 
-      if (!res.ok) throw new Error("Failed to save Aptitude results");
-
-      toast.success("Aptitude Test results saved!");
-    } catch (err) {
-      console.error(err);
-      toast.error("Error saving Aptitude results");
-    }
 
     if (onComplete) {
       onComplete({
