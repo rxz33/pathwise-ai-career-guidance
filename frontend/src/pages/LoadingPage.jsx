@@ -29,6 +29,7 @@ const LoadingPage = () => {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email }),
         });
+        console.log("Fetched questions:", data);
 
         if (!data.questions || data.questions.length === 0) {
           toast.error("No questions generated. Please try again.");
