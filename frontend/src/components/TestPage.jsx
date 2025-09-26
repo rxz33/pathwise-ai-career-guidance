@@ -94,14 +94,12 @@ const BigFiveTest = ({ onComplete, onSkip }) => {
   };
 
   try {
-    const res = await fetchFromAPI(`${API_BASE_URL}/big-five`, {  // <- use correct endpoint
+    const data = await fetchFromAPI("/big-five", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload)
     });
 
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.detail || "Submission failed");
     toast.success("Big Five test result sent!");
   } catch (err) {
     console.error(err);
