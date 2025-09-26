@@ -37,7 +37,7 @@ export default function CareerResultPage() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email })
         });
-        setTaskId(response.data.task_id);
+        setTaskId(response.task_id);
       } catch (err) {
         console.error(err);
         toast.error("Failed to start finalization.");
@@ -67,7 +67,7 @@ export default function CareerResultPage() {
         } else if (data.status === "failed") {
           clearInterval(interval);
           setLoading(false);
-          toast.error("Failed to generate career report.");
+          toast.error(data.error || "Failed to generate career report.");
         }
       } catch (err) {
         console.error(err);
