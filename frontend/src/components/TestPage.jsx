@@ -141,7 +141,7 @@ const BigFiveTest = ({ onComplete, onSkip }) => {
         test: "big_five",
         responses: allAnswers,
         scores: summary.reduce((acc, r) => {
-          acc[r.trait.toLowerCase()] = r.avg;
+          acc[r.trait.toLowerCase()] = parseFloat(r.avg);
           return acc;
         }, {})
       });

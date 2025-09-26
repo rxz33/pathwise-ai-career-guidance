@@ -22,14 +22,27 @@ async def analyze_aptitude(email: str):
         "aiInsights.partials.aptitude": summary
     })
 
+# @router.post("/big-five")
+# async def submit_big_five(payload: BigFivePayload):
+#     try:
+#         await save_test(payload.email, "bigFive", payload.scores)
+#         await analyze_aptitude(payload.email)
+#         return {"message": "Big Five stored & analyzed", "email": payload.email}
+#     except Exception as e:
+#         raise HTTPException(status_code=500, detail=str(e))
+
 @router.post("/big-five")
 async def submit_big_five(payload: BigFivePayload):
     try:
-        await save_test(payload.email, "bigFive", payload.scores)
+        print("Received payload:", payload.dict())  # log payload
+        saved = await save_test(payload.email, "bigFive", payload.scores)
+        print("Saved test:", saved)
         await analyze_aptitude(payload.email)
         return {"message": "Big Five stored & analyzed", "email": payload.email}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        print("Error in /big-five:", str(e))  # log full error
+        raise HTTPException(status_code=500, detail=f"Internal error: {str(e)}")
+
 
 @router.post("/riasec")
 async def submit_riasec(payload: RiasecPayload):
