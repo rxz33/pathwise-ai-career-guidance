@@ -103,7 +103,6 @@ class Optionals(BaseModel):
 
 class BigFivePayload(BaseModel):
     email: EmailStr
-    test: str
     scores: dict
     
 class RiasecPayload(BaseModel):
