@@ -104,7 +104,7 @@ class Optionals(BaseModel):
 class BigFivePayload(BaseModel):
     email: EmailStr
     test: Optional[str] = None
-    scores: Optional[dict] = None
+    scores: dict
     
 class RiasecPayload(BaseModel):
     email: EmailStr
