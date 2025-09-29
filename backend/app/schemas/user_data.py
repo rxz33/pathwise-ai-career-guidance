@@ -103,18 +103,18 @@ class Optionals(BaseModel):
 
 class BigFivePayload(BaseModel):
     email: EmailStr
-    test: str 
-    scores: dict
+    test: Optional[str] = None
+    scores: Optional[dict] = None
     
 class RiasecPayload(BaseModel):
     email: EmailStr
-    test: str
-    scores: dict
+    test: Optional[str] = None
+    scores: Optional[dict] = None
     
 class AptiPayload(BaseModel):
     email: EmailStr
-    test: str
-    scores: dict
+    test: Optional[str] = None
+    scores: Optional[dict] = None
     
 class Tests(BaseModel):
     bigFive: Optional[dict] = None
