@@ -1,15 +1,25 @@
-# app/agents/learning_roadmap_agent.py
 from .base_agent import BaseAgent
 from typing import Dict
 from app.services.llm_service import safe_json_parse
 
 class LearningRoadmapAgent(BaseAgent):
-    async def analyze_learning(self, learning_data: Dict, strengths_and_weaknesses: Dict) -> Dict:
+    async def analyze_learning(self, learning_data: Dict, strengths_and_weaknesses: Dict, user_name: str = "User") -> Dict:
+        # Only necessary fields
+        selected = {
+            k: learning_data.get(k) for k in [
+                "toolsTechUsed", "internshipOrProject", "relatedToCareer",
+                "studyPlan", "preferredLearning", "openToExplore",
+                "currentRole", "yearsOfExperience"
+            ]
+        }
+
+        # Optimized prompt
         prompt = f"""
-        Analyze user's learning roadmap in relation to strengths and weaknesses.
-        Learning data: {learning_data}
+        Provide a JSON summary for {user_name}'s learning roadmap:
+        Learning: {selected}
         Strengths/Weaknesses: {strengths_and_weaknesses}
-        Return JSON summary with: learning_gaps, recommendations, next_steps.
+        JSON keys: learning_gaps, recommendations, next_steps.
         """
+
         raw = await self.call_llm_cached("learning_summary", prompt)
         return safe_json_parse(raw, fallback={})

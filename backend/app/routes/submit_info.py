@@ -14,25 +14,45 @@ learning_agent = LearningRoadmapAgent()
 async def submit_user_info(request: Request):
     try:
         data = await request.json()
-        
-        # Accept 'personal' instead of 'personalInfo'
+
+        # Extract email safely
         email = data.get("personal", {}).get("email")
         if not email:
             raise HTTPException(status_code=422, detail="Email is required")
 
-        # Save raw user info
+        # Save raw user info (optional)
         await update_user_by_email(email, {"rawUserInfo": data})
 
-        # Extract relevant data for agents
-        personal_info = data.get("personal", {})
-        optional_fields = data.get("optionalFields", {})
-        strengths_and_weaknesses = data.get("strengthsAndWeaknesses", {})
-        learning_roadmap = data.get("learningRoadmap", {})
+        # --- Selected fields for LearningRoadmapAgent ---
+        learning_data = {k: data.get(k) for k in [
+            "toolsTechUsed", "internshipOrProject", "relatedToCareer",
+            "studyPlan", "preferredLearning", "openToExplore",
+            "currentRole", "yearsOfExperience"
+        ]}
+
+        strengths_and_weaknesses = {
+            "strengths": data.get("strengths"),
+            "struggleWith": data.get("struggleWith"),
+            "confidenceLevel": data.get("confidenceLevel")
+        }
+
+        # --- Selected fields for SocioEconomicAgent ---
+        personal_info = {
+            "name": data.get("personal", {}).get("name"),
+            "email": email,
+            "location": data.get("personal", {}).get("location"),
+            "financialStatus": data.get("personal", {}).get("financialStatus")
+        }
+
+        optional_fields = {k: data.get(k) for k in [
+            "favoriteSubjects", "activitiesThatMakeYouLoseTime",
+            "onlineContent", "preferredRole", "preferredCompany", "jobPriorities"
+        ]}
 
         # Run agents in parallel
         socio_summary, learning_summary = await asyncio.gather(
             socio_agent.generate_summary(personal_info, optional_fields),
-            learning_agent.analyze_learning(learning_roadmap, strengths_and_weaknesses)
+            learning_agent.analyze_learning(learning_data, strengths_and_weaknesses, user_name=personal_info.get("name"))
         )
 
         # Save partial summaries
