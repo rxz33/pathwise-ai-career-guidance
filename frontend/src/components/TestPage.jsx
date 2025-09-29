@@ -88,7 +88,7 @@ const BigFiveTest = ({ onComplete, onSkip }) => {
     email,
     test: "big_five",
     scores: summaryData.reduce((acc, r) => {
-      acc[r.trait] = r.avg;
+      acc[r.trait.toLowerCase()] = parseFloat(r.avg);
       return acc;
     }, {})
   };

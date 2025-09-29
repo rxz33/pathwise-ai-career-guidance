@@ -35,7 +35,7 @@ async def analyze_aptitude(email: str):
 async def submit_big_five(payload: BigFivePayload):
     try:
         print("Received payload:", payload.dict())  # log payload
-        saved = await save_test(payload.email, "bigFive", payload.scores)
+        saved = await save_test(payload.email, "big_five", payload.scores)
         print("Saved test:", saved)
         await analyze_aptitude(payload.email)
         return {"message": "Big Five stored & analyzed", "email": payload.email}
