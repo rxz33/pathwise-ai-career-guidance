@@ -24,7 +24,7 @@ const LoadingPage = () => {
     // Poll backend until questions appear
     const fetchQuestions = async () => {
       try {
-        const data = await fetchFromAPI("/generate-questions", {
+        const data = await fetchFromAPI("generate-questions", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email }),

@@ -54,7 +54,7 @@ export default function CareerResultPage() {
 
     const interval = setInterval(async () => {
       try {
-        const data = await fetchFromAPI(`/finalize-career-path/status/${taskId}`);
+        const data = await fetchFromAPI(`finalize-career-path/status/${taskId}`);
         setLoadingStage(data.current_stage || 0);
         if (data.partial_report) {
           setResult(data.partial_report.final_report || data.partial_report);

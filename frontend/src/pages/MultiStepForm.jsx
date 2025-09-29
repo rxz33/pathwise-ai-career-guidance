@@ -87,7 +87,7 @@ const MultiStepForm = ({ flatStyle = false }) => {
       formDataUpload.append("resume", formData.resumeFile[0]);
 
       // For FormData, call fetch directly without 'Content-Type' header
-      const uploadRes = await fetch(`${import.meta.env.VITE_API_URL}/upload-resume`, {
+      const uploadRes = await fetch(`${import.meta.env.VITE_API_URL}upload-resume`, {
         method: "POST",
         body: formDataUpload,
       });
@@ -99,7 +99,7 @@ const MultiStepForm = ({ flatStyle = false }) => {
     }
 
     // Submit form JSON data
-    await fetchFromAPI("/submit-info", {
+    await fetchFromAPI("submit-info", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(formData),

@@ -26,7 +26,7 @@ const CrossExamPage = ({ email: propEmail }) => {
       setLoading(true);
       setError("");
       try {
-        const data = await fetchFromAPI("/generate-questions", {
+        const data = await fetchFromAPI("generate-questions", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email }),
@@ -63,7 +63,7 @@ const CrossExamPage = ({ email: propEmail }) => {
 
     try {
       setLoading(true);
-      await fetchFromAPI("/submit-answers", {
+      await fetchFromAPI("submit-answers", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, answers }),
