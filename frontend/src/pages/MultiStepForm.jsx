@@ -68,7 +68,14 @@ const MultiStepForm = ({ flatStyle = false }) => {
   if (!email) return toast.error("Email missing. Please log in again.");
 
   const rawData = methods.getValues();
-  const formData = { ...rawData, personal: { ...rawData.personal, email } };
+  const formData = {
+    personal: { ...rawData.personal, email },
+    interests: rawData.interests,
+    strengthsAndWeaknesses: rawData.strengthsAndWeaknesses,
+    learningRoadmap: rawData.learningRoadmap,
+    optionalFields: rawData.optionalFields,
+  };
+
 
   try {
     setIsSubmitting(true);
