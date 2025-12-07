@@ -27,7 +27,7 @@ async def ask_groq(prompt: str, temperature: float = 0.7, max_tokens: int = 1024
                     {"role": "user", "content": prompt}
                 ],
                 temperature=temperature,
-                max_tokens=max_tokens  # ✅ Use correct parameter
+                max_tokens=max_tokens
             )
             return response.choices[0].message.content.strip()
 

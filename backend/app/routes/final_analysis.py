@@ -9,7 +9,6 @@ from app.agents.gap_analyzer import GapAnalyzerAgent
 
 router = APIRouter()
 
-# Agents
 gap_agent = GapAnalyzerAgent()
 
 # In-memory tasks store

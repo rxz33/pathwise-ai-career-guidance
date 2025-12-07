@@ -19,31 +19,36 @@ class CrossExamAgent:
         email = user.email or "anonymous"
 
         prompt = f"""
-You are a friendly, supportive career counselor. Generate **5–9 personalized questions** 
-to help the user identify gaps or inconsistencies in their career choices, skills, 
-preferences, and circumstances. Each question should feel like it comes from a human 
-counselor guiding them to think critically about their career path.  
+You are an expert career counselor. Generate 5–9 cross-examination questions based ONLY on the user’s data.
 
-Use the user data below to make the questions **specific and practical**:
+The questions must feel warm and human. 
+• Use the user’s name (“{user.personalInfo.fullName}”) naturally in 1–3 questions.
+• Include 1–2 soft, empathetic lines such as “It’s okay if you’re unsure…” or 
+  “I understand this part can feel confusing…”.
 
-- Full Name: {user.personalInfo.fullName if user.personalInfo else ""}
-- Strengths: {user.strengthsAndWeaknesses.strengths if user.strengthsAndWeaknesses else ""}
-- Weaknesses: {user.strengthsAndWeaknesses.struggleWith if user.strengthsAndWeaknesses else ""}
-- Preferred Role / Interests: {user.interests.preferredRole if user.interests else ""}
-- Risk-taking: {user.learningRoadmap.riskTaking if user.learningRoadmap else ""}
-- Leadership: {user.optionalFields.leadershipRole if user.optionalFields else ""}
-- Academic Field: {user.personalInfo.fieldOfStudy if user.personalInfo else ""}
-- Location: {user.personalInfo.hometown if user.personalInfo else ""}
-- Financial Capacity: {user.optionalFields.financialCapacity if user.optionalFields else ""}
-- Prior Experience / Optional Info: {user.optionalFields.additionalInfo if user.optionalFields else ""}
+Goal: uncover contradictions, unclear goals, unrealistic expectations, missing details, emotional hesitation, or practical constraints.
 
-**Guidelines:**
-- Merge 1–2 fields to ask practical, scenario-based questions (e.g., financial + location: "You want an engineering course in a costly city; how will you manage financially?")
-- Highlight contradictions (strengths vs weaknesses, risk-taking vs stability preference)
-- Include location and financial considerations
-- Include prior experience if relevant
-- Friendly, guiding, not criticizing
-- Respond ONLY with a JSON array of plain text questions. No extra text.
+User Data:
+- Name: {user.personalInfo.fullName}
+- Strengths: {user.strengthsAndWeaknesses.strengths}
+- Weaknesses: {user.strengthsAndWeaknesses.struggleWith}
+- Preferred Role: {user.interests.preferredRole}
+- Confidence: {user.interests.confidence}
+- Risk-taking: {user.learningRoadmap.riskTaking}
+- Field of Study: {user.personalInfo.fieldOfStudy}
+- Hometown: {user.personalInfo.hometown}
+- Willing to Move: {user.personalInfo.willingToMove}
+- Financial Capacity: {user.optionalFields.financialCapacity}
+- Leadership/Team Role: {user.optionalFields.leadershipRole}
+- Extra Info: {user.optionalFields.additionalInfo}
+
+Guidelines:
+- Merge 1–2 traits to form scenario-based questions.
+- Gently highlight contradictions (skills vs interest, risk-taking vs stability preference, financial limits vs expensive paths, etc.).
+- Include at least one question about hometown, relocation, or financial feasibility.
+- Empathetic tone in 1–2 questions, not all.
+- Output MUST be a pure JSON array of questions (strings only).
+
 """
 
 
@@ -54,7 +59,7 @@ Use the user data below to make the questions **specific and practical**:
             if not isinstance(questions, list):
                 questions = []
         except Exception as e:
-            print(f"[CrossExamAgent] ❌ Failed to parse questions: {e} | Raw: {raw[:200] if 'raw' in locals() else ''}")
+            print(f"[CrossExamAgent] Failed to parse questions: {e} | Raw: {raw[:200] if 'raw' in locals() else ''}")
             questions = []
 
         # Limit to 5–6 questions
@@ -107,7 +112,7 @@ Use the user data below to make the questions **specific and practical**:
                 "friendly_summary": "Analysis failed or invalid JSON."
             })
         except Exception as e:
-            print(f"[CrossExamAgent] ❌ Failed to analyze answers: {e}")
+            print(f"[CrossExamAgent] Failed to analyze answers: {e}")
             analysis = {
                 "strengths": [],
                 "weaknesses": [],
