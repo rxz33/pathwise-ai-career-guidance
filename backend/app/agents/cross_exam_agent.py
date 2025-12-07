@@ -33,14 +33,12 @@ User Data:
 - Strengths: {user.strengthsAndWeaknesses.strengths}
 - Weaknesses: {user.strengthsAndWeaknesses.struggleWith}
 - Preferred Role: {user.interests.preferredRole}
-- Confidence: {user.interests.confidence}
 - Risk-taking: {user.learningRoadmap.riskTaking}
 - Field of Study: {user.personalInfo.fieldOfStudy}
-- Hometown: {user.personalInfo.hometown}
-- Willing to Move: {user.personalInfo.willingToMove}
-- Financial Capacity: {user.optionalFields.financialCapacity}
+- Hometown: {user.personalInfo.city}
+- Willing to Move: {user.personalInfo.mobility}
+- Financial Capacity: {user.personalInfo.financialStatus}
 - Leadership/Team Role: {user.optionalFields.leadershipRole}
-- Extra Info: {user.optionalFields.additionalInfo}
 
 Guidelines:
 - Merge 1–2 traits to form scenario-based questions.
