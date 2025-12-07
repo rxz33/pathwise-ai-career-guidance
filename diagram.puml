@@ -1,0 +1,6 @@
+@startuml CrossExamDiagram
+Frontend -> FastAPI: POST /cross-exam
+FastAPI -> Gemini: Generate Questions
+Gemini --> FastAPI: Questions JSON
+FastAPI --> Frontend: Send Questions
+@enduml
