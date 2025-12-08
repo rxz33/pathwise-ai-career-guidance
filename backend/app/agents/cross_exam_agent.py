@@ -19,12 +19,10 @@ class CrossExamAgent:
         email = user.email or "anonymous"
 
         prompt = f"""
-You are a friendly, supportive career counselor. Generate **5–9 personalized questions** 
-to help the user identify gaps or inconsistencies in their career choices, skills, 
-preferences, and circumstances. Each question should feel like it comes from a human 
-counselor guiding them to think critically about their career path.  
+You are a warm, practical career counselor. Create 5–8 short, human-like cross-examination questions based ONLY on the user’s real data.  
+Your goal is to gently help them reflect on the gap between their dreams and their actual situation (finances, skills, city, weaknesses, family pressure, etc.)  
 
-Use the user data below to make the questions **specific and practical**:
+Use the user’s data directly in your questions:
 
 - Full Name: {user.personalInfo.fullName if user.personalInfo else ""}
 - Strengths: {user.strengthsAndWeaknesses.strengths if user.strengthsAndWeaknesses else ""}
@@ -37,13 +35,19 @@ Use the user data below to make the questions **specific and practical**:
 - Financial Capacity: {user.optionalFields.financialCapacity if user.optionalFields else ""}
 - Prior Experience / Optional Info: {user.optionalFields.additionalInfo if user.optionalFields else ""}
 
-**Guidelines:**
-- Merge 1–2 fields to ask practical, scenario-based questions (e.g., financial + location: "You want an engineering course in a costly city; how will you manage financially?")
-- Highlight contradictions (strengths vs weaknesses, risk-taking vs stability preference)
-- Include location and financial considerations
-- Include prior experience if relevant
-- Friendly, guiding, not criticizing
-- Respond ONLY with a JSON array of plain text questions. No extra text.
+Rules for the questions:
+1) Every question must combine 2–3 user traits (e.g., dream career + financial status + weaknesses).
+2) Use the user’s name in 1–2 questions naturally.
+3) In 1–2 questions, use a gentle, empathetic tone like:
+   “It’s okay if you’re unsure…” / “I know this can feel overwhelming…”
+4) Ask realistic, practical feasibility questions:
+   - If the dream career is costly or long (doctor, pilot, foreign studies, UPSC, IIT) AND finances are low → ask how they plan to manage fees, time, entrance exams.
+   - If skills/weaknesses don’t match their dream career → ask about building those skills.
+   - If their city lacks opportunities → ask how they plan to handle that.
+   - If risk-taking style doesn’t match the path → ask about that mismatch.
+5) Make questions feel like a real conversation, not like a form.
+6) Do NOT repeat anything from the multi-step form.
+7) Output MUST be ONLY a JSON array of questions, no explanations.
 """
 
 
