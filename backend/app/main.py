@@ -2,7 +2,6 @@ from fastapi import FastAPI, Request, HTTPException
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from app.utils.logger import logger
-from app.core.config import setup_cors
 from app.database import create_indexes
 from app.routes.submit_info import router as submit_info_router
 from app.routes.cross_exam import router as cross_exam_router
@@ -18,6 +17,7 @@ app = FastAPI(
 )
 
 # Allow frontend origins
+# Allow frontend origins
 origins = [
     "https://pathwise-ai-career-guidance-ii0gkawoe.vercel.app",
     "http://localhost:5173",
@@ -26,7 +26,7 @@ origins = [
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # allow your frontend
+    allow_origins=origins,       # <-- USE THIS, NOT "*"
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
