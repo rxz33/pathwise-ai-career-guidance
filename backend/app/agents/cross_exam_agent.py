@@ -162,7 +162,6 @@ Use this profile DIRECTLY in your questions:
 - Academic Field / Background: {user.personalInfo.fieldOfStudy if user.personalInfo else ""}
 - City / Location: {user.personalInfo.city if user.personalInfo else ""}
 - Financial Situation: {user.personalInfo.financialStatus if user.personalInfo else ""}
-- Extra Info (family, pressure, health, etc.): {user.optionalFields.additionalInfo if user.optionalFields else ""}
 
 Question style rules:
 1) Every question must feel like a real conversation, not an exam.
