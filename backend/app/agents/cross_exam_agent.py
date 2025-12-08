@@ -145,31 +145,50 @@ class CrossExamAgent:
         email = user.email or "anonymous"
 
         prompt = f"""
-You are a warm, human-like career counselor. Create 5–9 cross-examination questions  
-that feel personal, conversational, and genuinely supportive.  
-Your goal is to help the user reflect on inconsistencies, unclear decisions, emotional blocks,  
-and practical realities of their chosen career path.
+You are a warm, practical career counselor.
 
-Use the user's actual data to create questions that feel like a real counselor is talking to them:
+Based on the user's profile, write 5–8 SHORT, specific questions that help them reflect on:
+- the gap between their dreams and their real situation (money, marks, location, time)
+- contradictions in their own data (strengths vs weaknesses, risk vs stability, etc.)
+- concrete next steps they can actually take
 
-- Full Name: {user.personalInfo.fullName if user.personalInfo else ""}
+Use this profile DIRECTLY in your questions:
+- Name: {user.personalInfo.fullName if user.personalInfo else ""}
 - Strengths: {user.strengthsAndWeaknesses.strengths if user.strengthsAndWeaknesses else ""}
 - Weaknesses: {user.strengthsAndWeaknesses.struggleWith if user.strengthsAndWeaknesses else ""}
-- Preferred Role / Interests: {user.interests.preferredRole if user.interests else ""}
-- Risk-taking: {user.learningRoadmap.riskTaking if user.learningRoadmap else ""}
-- Leadership: {user.optionalFields.leadershipRole if user.optionalFields else ""}
-- Academic Field: {user.personalInfo.fieldOfStudy if user.personalInfo else ""}
-- Location: {user.personalInfo.city if user.personalInfo else ""}
-- Financial Capacity: {user.personalInfo.financialStatus if user.optionalFields else ""}
+- Preferred Role / Dream Careers: {user.interests.preferredRole if user.interests else ""}
+- Risk-taking Style: {user.learningRoadmap.riskTaking if user.learningRoadmap else ""}
+- Leadership / Responsibilities: {user.optionalFields.leadershipRole if user.optionalFields else ""}
+- Academic Field / Background: {user.personalInfo.fieldOfStudy if user.personalInfo else ""}
+- City / Location: {user.personalInfo.city if user.personalInfo else ""}
+- Financial Situation: {user.personalInfo.financialStatus if user.personalInfo else ""}
+- Extra Info (family, pressure, health, etc.): {user.optionalFields.additionalInfo if user.optionalFields else ""}
 
-Guidelines:
-- Use the user’s name naturally in 1–3 questions to add comfort and connection.
-- Make questions feel warm, empathetic, and reflective (e.g., “It’s okay if this feels confusing…”).
-- Every question must combine 1–2 data points together to avoid generic questions.
-- Highlight contradictions gently (strengths vs weaknesses, confidence vs preferred role, finances vs goals, risk-taking vs stability).
-- Ask scenario-based questions that encourage the user to think about their real-life situation.
-- Tone must feel like a supportive human, not like a form or test.
-- Output MUST be only a JSON array of questions (strings). No explanations.
+Question style rules:
+1) Every question must feel like a real conversation, not an exam.
+2) Use the user's own details inside the question (goals, money, city, strengths, weaknesses, etc.).
+   - If the user has low or struggling finances but wants an expensive or long study career
+     (e.g. doctor, foreign studies, IIT, big city degrees), ask HOW they imagine managing fees,
+     time, entrance exams, and family responsibilities.
+3) In at least 3 questions, MERGE 2–3 fields. Example patterns (do not copy text):
+   - dream career + financialStatus
+   - dream career + marks/skills + family/pressure
+   - riskTaking + preferredRole + stability/income
+4) Mention the user's name in 1–2 questions to make it feel personal.
+5) In 2–3 questions, sound gently empathetic and safe, for example:
+   - “I know this can feel heavy sometimes…”,
+   - “It’s okay if you’re unsure right now, {user.personalInfo.fullName}…”
+6) Ask about feasibility, trade-offs and Plan B when dreams are very risky or costly
+   compared to their current reality.
+7) Do NOT repeat questions that were already asked in a normal form (like “What are your strengths?”).
+   Always build ON TOP of the info they already gave.
+
+Respond ONLY with a valid JSON array of plain text questions, for example:
+[
+  "question 1...",
+  "question 2..."
+]
+No extra keys, no commentary, no markdown.
 """
 
 
