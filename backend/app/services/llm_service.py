@@ -43,21 +43,15 @@ def safe_json_parse(text: str, fallback: Dict[str, Any] = None) -> Dict[str, Any
 
         return fallback or {"error": f"Invalid JSON: {cleaned[:200]}"}
 
-# async def call_llm(provider: str, prompt: str, **kwargs) -> str:
-#     if provider == "groq":
-#         response = await ask_openai(prompt, **kwargs)
-#     elif provider == "gemini":
-#         # temporarily use OpenAI if Gemini fails
-#         response = await ask_openai(prompt, **kwargs)
-#     elif provider == "openai":
-#         response = await ask_openai(prompt, **kwargs)
-#     else:
-#         raise ValueError(f"Unknown LLM provider: {provider}")
-
-#     return _clean_response(response)
 async def call_llm(provider: str, prompt: str, **kwargs) -> str:
-    """
-    Always call Groq API regardless of provider.
-    """
-    response = await ask_groq(prompt, **kwargs)
-    return _clean_response(response)
+    if provider == "groq":
+        return _clean_response(await ask_groq(prompt, **kwargs))
+
+    elif provider == "gemini":
+        return _clean_response(await ask_gemini(prompt, **kwargs))
+
+    elif provider == "openai":
+        return _clean_response(await ask_openai(prompt, **kwargs))
+
+    else:
+        raise ValueError(f"Unknown LLM provider: {provider}")
