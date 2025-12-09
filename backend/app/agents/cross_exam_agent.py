@@ -31,9 +31,8 @@ Use the user’s data directly in your questions:
 - Risk-taking: {user.learningRoadmap.riskTaking if user.learningRoadmap else ""}
 - Leadership: {user.optionalFields.leadershipRole if user.optionalFields else ""}
 - Academic Field: {user.personalInfo.fieldOfStudy if user.personalInfo else ""}
-- Location: {user.personalInfo.hometown if user.personalInfo else ""}
-- Financial Capacity: {user.optionalFields.financialCapacity if user.optionalFields else ""}
-- Prior Experience / Optional Info: {user.optionalFields.additionalInfo if user.optionalFields else ""}
+- Location: {user.personalInfo.city if user.personalInfo else ""}
+- Financial Capacity: {user.personalInfo.financialStatus if user.personalInfo else ""}
 
 Rules for the questions:
 1) Every question must combine 2–3 user traits (e.g., dream career + financial status + weaknesses).
