@@ -19,37 +19,53 @@ class CrossExamAgent:
         email = user.email or "anonymous"
 
         prompt = f"""
-You are a warm, practical career counselor. Generate 5–8 short, personalized 
-cross-examination questions based ONLY on the user's real data below. Your goal is 
-to gently help them reflect on the gap between their dreams and their actual situation.
+You are a warm, practical career counselor. Begin with a short, gentle intro message 
+that uses the user's name naturally to help them feel comfortable. 
 
-Use the user’s data directly in your questions. If a data point is empty, you must avoid using it in the question.
+For example:
+"{user.personalInfo.fullName if user.personalInfo else 'Hey there'}, before we explore a few 
+reflective questions, I want you to know this is a safe space. There are no right or wrong answers. 
+Take your time, be honest with yourself, and treat this like a small conversation that can help you 
+understand your own path better."
+
+After the intro, generate 5–8 short, deeply personalized cross-examination questions 
+using ONLY the user’s real data below.
+
+Your goal: help the user reflect on gaps between their aspirations and their real situation 
+(finances, city, weaknesses, academic field, leadership ability, strengths, etc.) 
+in a gentle, supportive, non-judgmental way.
+
+If a field is empty or missing, DO NOT mention it or make assumptions.
 
 --- USER DATA ---
-- Full Name: {user.personalInfo.fullName if user.personalInfo else ""}
-- Strengths: {user.strengthsAndWeaknesses.strengths if user.strengthsAndWeaknesses else ""}
-- Weaknesses: {user.strengthsAndWeaknesses.struggleWith if user.strengthsAndWeaknesses else ""}
-- Preferred Role / Interests: {user.interests.preferredRole if user.interests else ""}
-- Risk-taking: {user.learningRoadmap.riskTaking if user.learningRoadmap else ""}
-- Leadership: {user.optionalFields.leadershipRole if user.optionalFields else "No prior leadership experience"}
-- Academic Field: {user.personalInfo.fieldOfStudy if user.personalInfo else ""}
-- Location: {user.personalInfo.city if user.personalInfo else ""}
-- Financial Capacity: {user.personalInfo.financialStatus if user.personalInfo else ""}
----
+Full Name: {user.personalInfo.fullName if user.personalInfo else ""}
+Strengths: {user.strengthsAndWeaknesses.strengths if user.strengthsAndWeaknesses else ""}
+Weaknesses: {user.strengthsAndWeaknesses.struggleWith if user.strengthsAndWeaknesses else ""}
+Preferred Role / Interests: {user.interests.preferredRole if user.interests else ""}
+Risk-taking: {user.learningRoadmap.riskTaking if user.learningRoadmap else ""}
+Leadership Experience: {user.optionalFields.leadershipRole if user.optionalFields else ""}
+Academic Field: {user.personalInfo.fieldOfStudy if user.personalInfo else ""}
+Location: {user.personalInfo.city if user.personalInfo else ""}
+Financial Capacity: {user.personalInfo.financialStatus if user.personalInfo else ""}
+------------------
 
 RULES:
-1. Every question MUST combine 2–3 traits (e.g., interest + weakness + finances).
-2. Use the user’s name in 1–2 questions.
-3. Use an empathetic tone in 1–2 questions (“It’s okay if this feels confusing…”).
-4. Ask practical feasibility questions:
-   - If career goal is costly and finances are low → ask about coping strategy.
-   - If city lacks opportunities → ask about relocation or online alternatives.
-   - If weaknesses contradict the dream role → ask about plan to overcome them.
-5. NO generic questions. Each question must sound tailored to THIS user’s life.
-6. Output ONLY a JSON array of plain text questions.
+1. First print the intro paragraph (1–2 lines) using the user’s name naturally.
+2. Then print the questions ONLY inside a JSON array.
+3. Every question MUST combine 2–3 real traits (e.g., interest + weakness + finances).
+4. Use the user’s name in 1 of the questions to maintain warmth.
+5. Include 1–2 empathetic lines like:
+   - “It’s okay if this feels confusing…”
+   - “Take your time with this…”
+6. Questions must be practical and scenario-based:
+   - Costly goals + low finances → ask about coping strategy.
+   - City limitations → ask about relocation or alternatives.
+   - Weaknesses contradicting career → ask about improvement plan.
+   - Low leadership + leadership-heavy roles → ask about skill-building.
+7. Make each question feel conversational, human, supportive — never generic.
+8. DO NOT mention missing or empty fields.
+9. After the intro, output ONLY a JSON array of questions (no explanation).
 """
-
-
 
         try:
             raw = await self.call_llm(prompt)

@@ -14,12 +14,10 @@ GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 if not GEMINI_API_KEY:
     raise EnvironmentError("GEMINI_API_KEY not found in .env file.")
 
-# Configure Gemini API
 genai.configure(api_key=GEMINI_API_KEY)
 
-# IMPORTANT: Prefix with "models/"
-MODEL_NAME = "models/gemini-1.5-pro-latest"
-# MODEL_NAME = "models/gemini-1.5-flash-latest"  # if you want cheaper
+# ✨ Use correct model from your ListModels output
+MODEL_NAME = "models/gemini-2.5-pro"
 
 async def ask_gemini(prompt: str, temperature: float = 0.7, max_tokens: int = 1024) -> str:
     try:
@@ -37,8 +35,9 @@ async def ask_gemini(prompt: str, temperature: float = 0.7, max_tokens: int = 10
             return response.text.strip()
 
         result = await asyncio.to_thread(sync_call)
+        logger.info("Received response from Gemini API")
         return result
 
     except Exception as e:
         logger.error(f"Gemini API call failed: {e}")
-        raise RuntimeError(f"Gemini API call failed: {str(e)}")
+        raise RuntimeError(str(e))
