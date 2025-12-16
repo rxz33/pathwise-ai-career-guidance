@@ -31,8 +31,8 @@ AGENT_DEFAULT_LLM = {
     "AptitudeInterestAgent": "groq",
     "ResumeAnalyzerAgent": "groq",
 
-    "CrossExamAgent": "gemini",
-    "GapAnalyzerAgent": "gemini",
+    "CrossExamAgent": "groq",
+    "GapAnalyzerAgent": "groq",
 
     "RecommenderAgent": "openai"
 }
