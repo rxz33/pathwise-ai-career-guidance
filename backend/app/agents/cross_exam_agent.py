@@ -30,15 +30,15 @@ Each question MUST explicitly reference at least ONE concrete user detail
 If a detail is missing, do NOT invent it.
 
 USER PROFILE:
-Name: {user.personalInfo.fullName or ""}
-Preferred Career: {user.interests.preferredRole or ""}
-Academic Background: {user.personalInfo.fieldOfStudy or ""}
-City: {user.personalInfo.city or ""}
-Financial Status: {user.personalInfo.financialStatus or ""}
-Strengths: {user.strengthsAndWeaknesses.strengths or ""}
-Weaknesses: {user.strengthsAndWeaknesses.struggleWith or ""}
-Risk-Taking Style: {user.learningRoadmap.riskTaking or ""}
-Leadership Experience: {user.optionalFields.leadershipRole or ""}
+Name: {user.personalInfo.fullName if user.personalInfo else ""}
+Strengths: {user.strengthsAndWeaknesses.strengths if user.strengthsAndWeaknesses else ""}
+Weaknesses: {user.strengthsAndWeaknesses.struggleWith if user.strengthsAndWeaknesses else ""}
+Preferred Role: {user.interests.preferredRole if user.interests else ""}
+Risk-taking: {user.learningRoadmap.riskTaking if user.learningRoadmap else ""}
+Leadership: {user.optionalFields.leadershipRole if user.optionalFields else ""}
+Field of Study: {user.personalInfo.fieldOfStudy if user.personalInfo else ""}
+City: {user.personalInfo.city if user.personalInfo else ""}
+Financial Status: {user.personalInfo.financialStatus if user.personalInfo else ""}
 
 QUESTION RULES:
 1. Every question must combine 2–3 real traits  
