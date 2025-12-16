@@ -19,36 +19,46 @@ class CrossExamAgent:
         email = user.email or "anonymous"
 
         prompt = f"""
-You are a warm, practical career counselor.
+You are acting like a human career counselor who knows this person personally.
 
-Generate 5–6 SHORT, personalized cross-examination questions.
-Return ONLY a JSON array of strings. No intro. No explanation.
+Generate EXACTLY 5–6 short, reflective questions.
+Return ONLY a JSON array of strings. No intro. No explanations.
 
-Use ONLY real user data. If a field is missing, DO NOT mention it.
+CRITICAL INSTRUCTION:
+Each question MUST explicitly reference at least ONE concrete user detail
+(name, finances, city, strengths, weaknesses, preferred role, risk style).
+If a detail is missing, do NOT invent it.
 
-USER DATA:
-Name: {user.personalInfo.fullName if user.personalInfo else ""}
-Strengths: {user.strengthsAndWeaknesses.strengths if user.strengthsAndWeaknesses else ""}
-Weaknesses: {user.strengthsAndWeaknesses.struggleWith if user.strengthsAndWeaknesses else ""}
-Preferred Role: {user.interests.preferredRole if user.interests else ""}
-Risk-taking: {user.learningRoadmap.riskTaking if user.learningRoadmap else ""}
-Leadership: {user.optionalFields.leadershipRole if user.optionalFields else ""}
-Field of Study: {user.personalInfo.fieldOfStudy if user.personalInfo else ""}
-City: {user.personalInfo.city if user.personalInfo else ""}
-Financial Status: {user.personalInfo.financialStatus if user.personalInfo else ""}
+USER PROFILE:
+Name: {user.personalInfo.fullName or ""}
+Preferred Career: {user.interests.preferredRole or ""}
+Academic Background: {user.personalInfo.fieldOfStudy or ""}
+City: {user.personalInfo.city or ""}
+Financial Status: {user.personalInfo.financialStatus or ""}
+Strengths: {user.strengthsAndWeaknesses.strengths or ""}
+Weaknesses: {user.strengthsAndWeaknesses.struggleWith or ""}
+Risk-Taking Style: {user.learningRoadmap.riskTaking or ""}
+Leadership Experience: {user.optionalFields.leadershipRole or ""}
 
-RULES:
-1. Each question MUST combine 2–3 traits.
+QUESTION RULES:
+1. Every question must combine 2–3 real traits  
+   (example: career goal + finances, weakness + role, city + opportunity).
 2. Use the user's name naturally in 1–2 questions.
-3. Include 1 empathetic line like:
-   - "It’s okay if this feels confusing…"
-4. Ask realistic feasibility questions:
-   - Expensive career + low finances
-   - Weakness vs dream role
-   - City limitations vs opportunities
-5. Keep tone human, supportive, reflective.
-6. Output ONLY JSON array.
+3. Include exactly ONE empathetic phrase such as:
+   “It’s okay if this feels confusing…” OR “Take a moment and think honestly…”
+4. NO generic counseling questions.
+5. NO vague wording like “your situation” or “your goals”.
+6. Questions should sound like:
+   “Given X, how will you realistically do Y?”
+
+OUTPUT FORMAT:
+[
+  "question 1",
+  "question 2",
+  ...
+]
 """
+
 
         raw = await self.call_llm(prompt)
         questions = safe_json_parse(raw, fallback=[])
