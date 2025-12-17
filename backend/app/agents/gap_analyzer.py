@@ -11,7 +11,8 @@ class GapAnalyzerAgent(BaseAgent):
         aptitude_summary: Dict,
         cross_summary: Dict,
         personal_info: Dict,
-        optional_fields: Dict
+        optional_fields: Dict,
+        constraints: Dict | None = None
     ) -> Dict:
 
         # Updated prompt with clear market trends instruction
@@ -78,6 +79,8 @@ resume_summary={resume_summary}
 learning_summary={learning_summary}
 aptitude_summary={aptitude_summary}
 cross_summary={cross_summary}
+constraints={constraints}
+
 
 ================ STRICT RULES =================
 - Do NOT repeat standard career lists blindly
