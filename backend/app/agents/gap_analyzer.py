@@ -16,33 +16,71 @@ class GapAnalyzerAgent(BaseAgent):
 
         # Updated prompt with clear market trends instruction
         prompt = f"""
-        You are a professional career counselor AI. Generate a JSON career guidance report.
+You are a senior human career counselor AI.
 
-        Required keys:
-        1. friendly_summary: A warm, concise, human-readable paragraph summarizing the user's career potential,
-           highlighting strengths, areas to improve, and motivational tips. Make it encouraging and personalized.
-        2. top_careers: 3 recommended careers for the user, each with:
-           - name
-           - merits (3-5)
-           - demerits (3-5)
-           - current market trends (brief, 2-3 key points on demand, growth, opportunities)
-        3. strengths
-        4. weaknesses
-        5. skill_gaps
-        6. suggestions
-        7. next_steps
+Your task is NOT to be generic.
+Your task is to DIFFERENTIATE this user from others with similar skills.
 
-        Use user's data:
-        personal_info={personal_info},
-        optional_fields={optional_fields},
-        socio_summary={socio_summary},
-        resume_summary={resume_summary},
-        learning_summary={learning_summary},
-        aptitude_summary={aptitude_summary},
-        cross_summary={cross_summary}
+First, internally identify:
+- Conflicting signals across data (skills vs aptitude, interests vs reality, ambition vs constraints)
+- Overused strengths
+- Hidden risks
 
-        Return JSON only. Ensure no field is empty. Keep top careers concise, and make friendly_summary motivating.
-        """
+Then generate a JSON career guidance report with the following rules:
+
+================ REQUIRED OUTPUT =================
+
+1. friendly_summary
+- 5–6 lines
+- Mention ONE uncomfortable truth gently
+- Mention ONE hidden advantage
+- Mention ONE practical limitation (finance, location, personality, or learning speed)
+
+2. top_careers (EXACTLY 3)
+Each career must include:
+- name
+- merits (why it fits THIS user specifically)
+- demerits (why it may NOT fit this user)
+- trends (market trends RELEVANT to this user’s background & constraints)
+
+RULES FOR CAREERS:
+• Only 1 career can be a “safe/common” choice
+• At least 1 career must be NON-OBVIOUS
+• At least 1 career must be HIGH-RISK / HIGH-EFFORT
+• If two careers are similar, downgrade one
+
+3. strengths
+- Only strengths that are ACTUALLY proven by data
+
+4. weaknesses
+- Include at least 1 internal weakness (habits, confidence, communication, indecision)
+
+5. skill_gaps
+- Gaps that BLOCK progress (not generic learning suggestions)
+
+6. suggestions
+- Actions that REDUCE risk or CONFIRM fit
+
+7. next_steps
+- Concrete 30–60–90 day actions
+
+================ USER DATA =================
+personal_info={personal_info}
+optional_fields={optional_fields}
+socio_summary={socio_summary}
+resume_summary={resume_summary}
+learning_summary={learning_summary}
+aptitude_summary={aptitude_summary}
+cross_summary={cross_summary}
+
+================ STRICT RULES =================
+- Do NOT repeat standard career lists blindly
+- Do NOT recommend all tech roles
+- Do NOT assume high confidence or clarity
+- Every section must feel SPECIFIC to THIS person
+- Return ONLY valid JSON
+"""
+
 
         raw = await self.call_llm_cached("final_gap_report", prompt)
         result = safe_json_parse(raw, fallback={})
