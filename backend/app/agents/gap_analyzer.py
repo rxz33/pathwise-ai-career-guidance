@@ -39,9 +39,11 @@ Then generate a JSON career guidance report with the following rules:
 2. top_careers (EXACTLY 3)
 Each career must include:
 - name
+- category (one of: SAFE, NON_OBVIOUS, HIGH_RISK)
 - merits (why it fits THIS user specifically)
 - demerits (why it may NOT fit this user)
 - trends (market trends RELEVANT to this user’s background & constraints)
+
 
 RULES FOR CAREERS:
 • Only 1 career can be a “safe/common” choice
@@ -64,6 +66,10 @@ RULES FOR CAREERS:
 7. next_steps
 - Concrete 30–60–90 day actions
 
+8. key_conflicts
+- 2–3 bullet points describing major contradictions in the user's profile
+
+
 ================ USER DATA =================
 personal_info={personal_info}
 optional_fields={optional_fields}
@@ -76,6 +82,7 @@ cross_summary={cross_summary}
 ================ STRICT RULES =================
 - Do NOT repeat standard career lists blindly
 - Do NOT recommend all tech roles
+- At least ONE career demerit must directly relate to a key_conflict
 - Do NOT assume high confidence or clarity
 - Every section must feel SPECIFIC to THIS person
 - Return ONLY valid JSON
@@ -84,7 +91,7 @@ cross_summary={cross_summary}
 
         raw = await self.call_llm_cached("final_gap_report", prompt)
         result = safe_json_parse(raw, fallback={})
-
+        
         # Normalize lists to ensure consistency
         for key in ["strengths", "weaknesses", "skill_gaps", "suggestions", "next_steps"]:
             val = result.get(key)
@@ -116,5 +123,15 @@ cross_summary={cross_summary}
             "friendly_summary",
             "Here is your friendly career summary based on your profile."
         ))
+        
+        # Enforce category diversity
+        categories = [c.get("category") for c in result.get("top_careers", [])]
+
+        if len(set(categories)) < 3:
+        # Soft correction instead of failure
+            result["top_careers"][0]["category"] = "SAFE"
+            result["top_careers"][1]["category"] = "NON_OBVIOUS"
+            result["top_careers"][2]["category"] = "HIGH_RISK"
+
 
         return result

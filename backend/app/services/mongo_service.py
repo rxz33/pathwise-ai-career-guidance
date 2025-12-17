@@ -6,6 +6,7 @@ MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017")
 client = AsyncIOMotorClient(MONGO_URI)
 db = client["pathwise_db"]
 user_collection = db["user_data"]
+career_tasks = db["career_tasks"]
 
 # ---------- Generic Helpers ----------
 
@@ -68,6 +69,7 @@ async def save_cross_exam_analysis(email: str, analysis: str):
 async def save_cross_exam_followups(email: str, followups: list):
     return await update_user_by_email(email, {"crossExam.followups": followups})
 
+
 # ---------- Final Career Analysis ----------
 
 async def update_final_analysis(email: str, analysis: dict):
@@ -77,4 +79,44 @@ async def update_final_analysis(email: str, analysis: dict):
         print(f"[MongoDB] 🆕 Created new user and stored finalAnalysis for {normalized_email}")
     else:
         print(f"[MongoDB] ✅ Updated finalAnalysis for {normalized_email}")
+    return result
+
+# ---------- Career Task Helpers ----------
+
+async def create_career_task(task: dict):
+    """
+    Create a new background career finalization task.
+    """
+    await career_tasks.insert_one(task)
+    print(f"[MongoDB] 🆕 Created career task {task.get('_id')}")
+    return task
+
+
+async def get_career_task(task_id: str):
+    """
+    Fetch career task by task_id.
+    """
+    task = await career_tasks.find_one({"_id": task_id})
+    if not task:
+        print(f"[MongoDB] ❌ Career task not found: {task_id}")
+    return task
+
+
+async def update_career_task(task_id: str, updates: dict):
+    """
+    Update career task status, stage, or results.
+    """
+    if not updates:
+        return None
+
+    result = await career_tasks.update_one(
+        {"_id": task_id},
+        {"$set": updates}
+    )
+
+    if result.matched_count == 0:
+        print(f"[MongoDB] ❌ Failed to update task {task_id}")
+    else:
+        print(f"[MongoDB] ✅ Updated task {task_id} with {updates.keys()}")
+
     return result
