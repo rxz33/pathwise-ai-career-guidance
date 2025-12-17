@@ -108,7 +108,7 @@ const CrossExamPage = ({ email: propEmail }) => {
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-purple-50 flex flex-col items-center py-10 px-4">
       <div className="w-full max-w-2xl bg-white shadow-lg rounded-2xl p-8 space-y-6">
         <h2 className="text-2xl font-bold text-center text-indigo-700 mb-6">
-          Quick Verification Questions
+          Career Reflection Checkpoint
         </h2>
 
         {questions.map((q, i) => (
@@ -128,7 +128,7 @@ const CrossExamPage = ({ email: propEmail }) => {
           onClick={handleSubmit}
           className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-xl transition shadow-lg mt-4"
         >
-          Submit Answers
+          Continue to Career Analysis
         </button>
       </div>
     </div>

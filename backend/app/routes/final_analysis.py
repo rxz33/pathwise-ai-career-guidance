@@ -118,7 +118,7 @@ async def run_finalization(task_id: str, user_data: Dict):
         for key in ["strengths", "weaknesses", "skill_gaps", "suggestions", "next_steps"]:
             final_report[key] = force_list(final_report.get(key))
 
-        # 🔥 CRITICAL FIX: normalize top_careers completely
+        # CRITICAL FIX: normalize top_careers completely
         normalized_careers = []
 
         for career in final_report.get("top_careers", []):

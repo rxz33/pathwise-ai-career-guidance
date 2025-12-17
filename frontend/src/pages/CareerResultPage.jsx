@@ -163,7 +163,7 @@ export default function CareerResultPage() {
         </div>
       ) : result ? (
         <div className="max-w-5xl bg-white shadow-2xl rounded-3xl p-8 space-y-8 mt-10">
-          <h1 className="text-3xl font-bold text-center text-indigo-700">🎓 Your Career Guidance Summary</h1>
+          <h1 className="text-3xl font-bold text-center text-indigo-700">Personalized Career Insight Report</h1>
 
           <section className="bg-indigo-50 p-4 rounded-lg shadow-inner">
             <h2 className="text-xl font-semibold">Friendly Summary</h2>
